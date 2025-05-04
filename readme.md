@@ -43,9 +43,17 @@ This project is a full-stack web application that predicts the pathogenicity of 
 - Shadcn UI for components
 - T3 Stack (modular, type-safe full-stack setup)
 
+---
+
 ## Reference Model
 
 Following is the paper behind the model:
 
 - [Paper](https://www.biorxiv.org/content/10.1101/2025.02.18.638918v1)
 - [GitHub Repository](https://github.com/ArcInstitute/evo2)
+
+---
+
+## Example Use Case
+
+> A researcher wants to evaluate whether the mutation c.68_69delAG in the BRCA1 gene is likely pathogenic. They search BRCA1, select the region, and input the variant. The web app returns Evo2's prediction and shows that ClinVar also labels it as pathogenic.
