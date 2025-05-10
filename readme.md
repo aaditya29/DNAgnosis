@@ -57,3 +57,74 @@ Following is the paper behind the model:
 ## Example Use Case
 
 > A researcher wants to evaluate whether the mutation c.68_69delAG in the BRCA1 gene is likely pathogenic. They search BRCA1, select the region, and input the variant. The web app returns Evo2's prediction and shows that ClinVar also labels it as pathogenic.
+
+---
+
+## Getting Started
+
+### Install Python
+
+Download and install Python if not already installed. Use the link below for guidance on installation:
+[Python Download](https://www.python.org/downloads/)
+
+Create a virtual environment for each folder, except elevenlabs-clone-frontend, with **Python 3.10**.
+
+### Backend
+
+Navigate to backend folder:
+
+```bash
+cd evo2-backend
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Modal setup:
+
+```bash
+modal setup
+```
+
+Run on Modal:
+
+```bash
+modal run main.py
+```
+
+Deploy backend:
+
+```bash
+modal deploy main.py
+```
+
+### Frontend
+
+Install dependencies:
+
+```bash
+cd evo2-frontend
+npm i
+```
+
+Run:
+
+```bash
+npm run dev
+```
+
+---
+
+## References
+
+- [Evo2 GitHub Repository](https://github.com/facebookresearch/llama-evo)
+- [ClinVar Variant Database](https://www.ncbi.nlm.nih.gov/clinvar/)
+- [Modal Documentation](https://modal.com/docs)
+- [Andreas Trolle for Tutorial](https://www.youtube.com/@andreastrolle)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [T3 Stack Overview](https://create.t3.gg)
+
+---
