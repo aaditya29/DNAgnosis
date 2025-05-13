@@ -1,6 +1,6 @@
 # Model Explanation
 
-## Basic Pre-requisite of Biotech
+## Basic Pre-requisite of DNA
 
 ### Understanding DNA Strings
 
@@ -69,4 +69,10 @@ Each nucleotide consists of three components:
 Nucleotides are connected by covalent bonds to form a long chain, creating the structure of DNA or RNA. The sequence of these nucleotides encodes genetic information.
 
 - **Base pairs:** DNA is double stranded, and the strands are held together by nucleotides pairing up. A pairs to T, and G pairs to C.<br>
-  The reason the model works with single ACGT strings instead of pairs, is that they are always complementary anyways. A always pair to T, G always pair to C.
+
+> The reason the model works with single ACGT strings instead of pairs, is that they are always complementary i.e. A always pair to T, G always pair to C.
+
+## About Evo2 Model
+
+Evo 2 is a genomic foundation model capable of generalist prediction and design tasks across DNA, RNA, and proteins. It uses a frontier deep learning architecture to enable modeling of biological sequences at single-nucleotide resolution with near-linear scaling of compute and memory relative to context length. Evo 2 is trained with 40 billion parameters and 1 megabase context length on over 9 trillion nucleotides of diverse eukaryotic and prokaryotic genomes. <br>
+**For example:** ATGCATGC -> ATGGCTA
