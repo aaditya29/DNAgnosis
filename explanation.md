@@ -83,3 +83,5 @@ Evo 2 is a genomic foundation model capable of generalist prediction and design 
 
 It is a massive genomic dataset designed specifically for training advanced DNA language models. It contains ~8.8 trillion tokens derived from genomes across all domains of life.<br>
 It can be used to train deep learning models that understand the "language" of DNA sequences. These models can learn patterns, structures, and relationships within genomic data that might not be obvious through traditional analysis methods.
+
+### Training of the Evo2
