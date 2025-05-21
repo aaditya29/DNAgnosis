@@ -84,60 +84,63 @@ Evo 2 is a genomic foundation model capable of generalist prediction and design 
 It is a massive genomic dataset designed specifically for training advanced DNA language models. It contains ~8.8 trillion tokens derived from genomes across all domains of life.<br>
 It can be used to train deep learning models that understand the "language" of DNA sequences. These models can learn patterns, structures, and relationships within genomic data that might not be obvious through traditional analysis methods.
 
-### Training of the Evo2
-
 ### Training Process of Evo2
 
-Evo2’s training was divided into **two stages**:
+The training process for Evo2 was divided into two main parts:
 
-#### 1. **Pretraining** (8k token context)
+#### 1. Pre-training (Limited 8k Context Window)
 
-- The base Evo2 model was trained on sequences with a maximum length of **8,000 nucleotides.**
-- Focuses on **smaller-scale DNA grammar**, e.g.:
-  - tRNA
-  - Bacterial genes
-  - Non-coding RNA (ncRNA)
-  - Operons (gene clusters in prokaryotes)
-- Learns **basic features** in:
+- **Focus:** This initial phase of training concentrated on learning the fundamental "grammar" of DNA. This includes understanding patterns and relationships within shorter DNA sequences.
+- **Context Window:** The model's attention was limited to a context window of 8,000 nucleotides (8k). This means it primarily learned dependencies and patterns within these smaller segments of DNA.
+- **Learned Features:** During pre-training, Evo2 learned features present in:
   - Smaller genes
-  - Subsections of larger genes
-- Efficient at discovering **short, local patterns** in DNA.
+  - Parts of larger genes
+- **Pattern Recognition:** Some crucial biological patterns are short enough to be observed and learned within this 8k context window.
+- **Analogy:** Think of this like learning the basic rules of a language by reading sentences and short paragraphs.
 
-**Analogy**:  
-Reading **one page at a time** instead of trying to understand an entire book at once.  
-This helps the model **learn small patterns more effectively**.
+#### 2. Mid-training (Context Extension to 1M)
 
-#### 2. **Midtraining** (Extended context up to 1 million tokens)
+- **Focus:** This subsequent phase extended the model's ability to understand much longer-range dependencies and context within DNA sequences.
+- **Context Window Expansion:** The context window was significantly increased to 1 million nucleotides (1M). This allowed the model to consider much larger genomic regions at once.
+- **Biological Context:** This larger context window is essential for understanding the function and regulation of various biological elements, including:
+  - **Bacterial gene:** A segment of DNA that codes for a functional product (usually a protein).
+  - **tRNA (transfer RNA):** A type of RNA molecule that helps in protein synthesis.
+  - **ncRNA (non-coding RNA):** RNA molecules that have regulatory or other functions but do not code for proteins.
+  - **Operon:** A cluster of genes under the control of a single promoter, common in bacteria.
+  - **Organelle:** Specialized subunits within a cell (e.g., mitochondria).
+  - **Phage (bacteriophage):** A virus that infects bacteria.
+  - **Human TAD (Topologically Associating Domain):** Large genomic regions that tend to interact more frequently with each other than with regions outside the TAD.
+  - **_M. genitalium_ chromosome:** The entire chromosome of the bacterium _Mycoplasma genitalium_, a relatively small genome.
+  - **Yeast chromosome:** A chromosome from a yeast cell, representing a more complex eukaryotic genome.
+- **Analogy:** This is like moving from understanding individual sentences to comprehending entire chapters and the overall narrative of a book.
 
-- Context window is extended to handle **up to 1 million nucleotides**
-- Enables learning across **larger biological structures**, including:
-  - Eukaryotic genes
-  - Phage genomes
-  - Organelles (like mitochondria)
-  - Human TADs (Topologically Associating Domains)
-  - Yeast chromosomes
-  - Entire bacterial or minimal genomes (e.g., _M. genitalium_)
+### Biological Concepts Relevant to Model Training
 
-📏 Evo2 learns **across scales**:  
-From tiny functional units → to whole-genome architecture.
+Understanding some basic biological concepts is helpful for appreciating how the Evo2 model learns to predict variant effects.
 
----
+**Codons:**
 
-### Biological Concepts Used in Evo2
+- A codon is a sequence of **three nucleotides** in DNA or RNA that specifies a particular amino acid during protein synthesis or signals the termination of the process.
+- The image shows a circular representation of the genetic code, illustrating which three-nucleotide codons correspond to which amino acids. For example, `AUG` is typically the start codon (coding for Methionine), and `UAA`, `UAG`, and `UGA` are stop codons.
 
-#### DNA Basics
+**Understanding Signals for the Beginning and End of Protein Coding:**
 
-- DNA is made up of four nucleotides: **A, T, C, G**
-- DNA is read in sequences, often in groups of **three bases** called **codons**
+- The start codon (typically AUG) signals where the ribosome should begin translating the mRNA sequence into a protein.
+- The stop codons (UAA, UAG, UGA) signal the ribosome to stop protein synthesis.
 
-#### What are Codons?
+**Example of Context Importance:**
 
-- A **codon** is a sequence of **three nucleotides** that codes for a single **amino acid**
-- Used to **translate DNA into proteins**
-- Start and stop codons **signal** the beginning and end of a protein-coding region
+The example `ATGATGCCGATATG` highlights the significance of the context window:
 
-#### Example DNA Sequence:
+- **Local Pattern:** The sequence "ATG" is a very small pattern (3 nucleotides, or 1 token in this context).
+- **Limited Context:** If the model only considers a very small context window (like 8k in the pre-training focusing on local grammar), it might learn that "ATG" can be a start codon.
+- **Larger Context:** However, within a larger context window (like the 1M in mid-training), the model can learn more complex relationships. For instance, it can learn that the presence or absence of other regulatory sequences or the overall gene structure around this "ATG" might determine if it truly functions as a start codon or is just part of a different coding sequence.
+- **Analogy:** Consider the word "read." By itself, it has a simple meaning. But in the context of "I will read a book" versus "I read a book yesterday," the meaning and grammatical function change. A larger context is needed to understand the true meaning.
 
-```text
-ATGATGCCCGATATG
-```
+### Implications for Variant Effect Prediction
+
+The two-stage training process of Evo2, starting with local DNA grammar and then expanding to long-range context, is crucial for variant effect prediction:
+
+- **Local Effects:** Mutations within codons can directly change the amino acid sequence of a protein, potentially altering its structure and function. The model's pre-training helps it understand these local relationships.
+- **Regulatory Effects:** Mutations outside of coding regions can affect gene expression by altering regulatory elements (e.g., promoters, enhancers). These elements can be located far from the gene they regulate, making the large context window learned during mid-training essential for predicting such effects.
+- **Complex Interactions:** The 1M context window allows the model to learn about interactions between different genomic elements and how mutations in one area might influence distant regions.
