@@ -170,3 +170,84 @@ This method involves providing the model with DNA sequences and observing the sc
 - **Model Interpretation:** The model should assign lower scores (or higher perplexity) to sequences that are syntactically incorrect with respect to codon structure.
 - **Analogy:** If a language model understands English words, it will likely assign a higher probability to "The cat sat" compared to "The cta sat" because the latter has a misspelled word. Similarly, Evo2, if it understands codons, should "recognize" and score valid codon sequences differently from those with single nucleotide errors that disrupt the triplet structure.
 - **Confirmation:** This way, we can confirm that Evo2 has picked up on what a codon is. Basically, if a sequence looks like the protein is "spelled incorrectly" (due to mutations disrupting codons), the model should know.
+
+### How to do scoring?
+
+#### Forward
+
+Evo 2 can be used to score the likelihoods across a DNA sequence.
+
+```python
+import torch
+from evo2 import Evo2
+
+# 1. Load the Evo2 model
+evo2_model = Evo2('evo2_7b')
+
+# 2. Define the input DNA sequence
+sequence = 'ACGT'
+
+# 3. Tokenize the sequence
+input_ids = torch.tensor(
+    evo2_model.tokenizer.tokenize(sequence),
+    dtype=torch.int,
+).unsqueeze(0).to('cuda:0')
+
+# 4. Pass the tokenized input through the model
+outputs, _ = evo2_model(input_ids)
+
+# 5. Extract the logits
+logits = outputs[0]
+
+# 6. Print the logits and their shape
+print('Logits: ', logits)
+print('Shape (batch, length, vocab): ', logits.shape)
+```
+
+**Step-by-Step Explanation:**
+
+1.  **`import torch`**: This line imports the PyTorch library, which is a fundamental framework for tensor computations and building neural networks in Python.
+
+2.  **`from evo2 import Evo2`**: This line imports the `Evo2` class from the `evo2` library. This class allows you to load and interact with pre-trained Evo2 models.
+
+3.  **`evo2_model = Evo2('evo2_7b')`**:
+
+    - This line creates an instance of the `Evo2` model.
+    - `'evo2_7b'` is a string identifier that tells the `Evo2` class which specific pre-trained Evo2 model to load. The `evo2` library likely handles downloading and loading the weights for this 7 billion parameter model.
+    - The `evo2_model` object now represents the loaded Evo2 model, ready to process DNA sequences.
+
+4.  **`sequence = 'ACGT'`**:
+
+    - This line defines a string variable `sequence` containing a simple DNA sequence "ACGT". This is the input we want to score. In a real-world application, this would be a longer and potentially mutated DNA sequence.
+
+5.  **`input_ids = torch.tensor(...)`**: This block prepares the input sequence for the Evo2 model:
+
+    - **`evo2_model.tokenizer.tokenize(sequence)`**: The Evo2 model, being a large language model trained on DNA, uses a tokenizer to convert the input DNA sequence (string of characters) into a sequence of numerical tokens (integers) that the model can understand. This tokenizer likely maps each nucleotide (A, C, G, T) to a specific integer ID. The output of this function will be a list of these integer tokens.
+    - **`torch.tensor(..., dtype=torch.int)`**: This converts the list of integer tokens into a PyTorch tensor. PyTorch tensors are multi-dimensional arrays that are the fundamental data structure for computations in PyTorch. `dtype=torch.int` specifies that the elements of the tensor should be integers.
+    - **`.unsqueeze(0)`**: This adds a batch dimension to the tensor. Most deep learning models, including Evo2, are designed to process inputs in batches. `unsqueeze(0)` adds a dimension of size 1 at the beginning of the tensor, effectively making it a batch of one sequence. The shape of `input_ids` will now be `(1, sequence_length)`, where `sequence_length` is the number of nucleotides in the input sequence.
+    - **`.to('cuda:0')`**: This moves the `input_ids` tensor to the first CUDA-enabled GPU. This is done to perform the model inference (passing the input through the model) on the GPU, which is significantly faster for large models like Evo2. If you don't have a GPU, you should change this to `.to('cpu')` to run the computation on your CPU (which will be slower).
+
+6.  **`outputs, _ = evo2_model(input_ids)`**:
+
+    - This is the core line where the input sequence is passed through the Evo2 model for inference.
+    - `evo2_model(input_ids)` calls the forward pass of the Evo2 neural network. It takes the tokenized and batched input sequence (`input_ids`) as input.
+    - The model returns a tuple. The first element (`outputs`) typically contains the model's output logits (raw, unnormalized scores). The second element (`_`) often contains other information like attention weights or hidden states, which we are ignoring here using the underscore `_`.
+
+7.  **`logits = outputs[0]`**:
+
+    - `outputs` is likely a tuple or a list containing the output for each sequence in the batch. Since we only input one sequence (batch size of 1), we access the logits for that single sequence using `outputs[0]`.
+    - `logits` now contains the raw, unnormalized scores predicted by the Evo2 model for each token in the input sequence, predicting the next possible token in the sequence.
+
+8.  **`print('Logits: ', logits)`**: This line prints the `logits` tensor to the console. These values represent the model's confidence in each possible next nucleotide at each position in the input sequence. Higher values indicate higher confidence.
+
+9.  **`print('Shape (batch, length, vocab): ', logits.shape)`**: This line prints the shape of the `logits` tensor. The shape will typically be `(batch_size, sequence_length, vocabulary_size)`.
+
+    - `batch_size`: In this case, it's 1 because we processed one sequence.
+    - `sequence_length`: This is the number of tokens in the input sequence (4 in our example: A, C, G, T).
+    - `vocabulary_size`: This is the total number of possible tokens that the Evo2 model can predict. For a DNA model, the vocabulary would likely include the four nucleotides (A, C, G, T) and possibly some special tokens (like start/end of sequence tokens). The `logits` tensor at index `[0, i, j]` will contain the score for the $j^{th}$ token in the vocabulary being the next token after the $i^{th}$ token in the input sequence.
+
+**What the Code Does for Scoring Likelihoods:**
+
+This code doesn't directly output probabilities or likelihoods in a normalized way (like between 0 and 1). Instead, it outputs **logits**. Logits are the raw, unnormalized scores from the model's final layer.
+
+To get probabilities (which represent the likelihood of each possible next nucleotide), you would typically apply a **softmax function** along the last dimension (the vocabulary dimension) of the `logits` tensor. The softmax function converts these raw scores into a probability distribution where the values sum up to 1.
