@@ -144,3 +144,29 @@ The two-stage training process of Evo2, starting with local DNA grammar and then
 - **Local Effects:** Mutations within codons can directly change the amino acid sequence of a protein, potentially altering its structure and function. The model's pre-training helps it understand these local relationships.
 - **Regulatory Effects:** Mutations outside of coding regions can affect gene expression by altering regulatory elements (e.g., promoters, enhancers). These elements can be located far from the gene they regulate, making the large context window learned during mid-training essential for predicting such effects.
 - **Complex Interactions:** The 1M context window allows the model to learn about interactions between different genomic elements and how mutations in one area might influence distant regions.
+
+## Understanding Evo2's Codon Learning and Mutation Analysis
+
+### 1. Checking if Evo2 Has Learned About Codons
+
+There are two primary ways to check if the Evo2 model has learned the concept of codons (three-nucleotide sequences that code for amino acids):
+
+**One Feature is Generation:**
+
+- **Concept:** We can prompt the Evo2 model with a series of preceding nucleotides and observe if it correctly predicts the next nucleotide based on codon structure.
+- **Example:** If we input "ATG", which is often a start codon, and the model predicts that the next three nucleotides will likely form another valid codon, it suggests the model has learned the triplet nature of codons. If we provide "ATGC" (four nucleotides) and the model struggles to predict the subsequent nucleotides in a codon-aware way, it might indicate a lack of understanding.
+- **Key Idea:** The model's ability to generate sequences that adhere to the three-nucleotide codon structure implies it has learned this fundamental rule of DNA coding.
+
+**Another is Scoring:**
+
+This method involves providing the model with DNA sequences and observing the scores (likely perplexity or likelihood) it assigns to them.
+
+- **Step 1: Put in correct codons and get score (e.g., AGC).**
+  - **Explanation:** We input a sequence consisting of valid codons. A model that understands codon structure should assign a relatively high score (or low perplexity) to such a sequence, indicating it's a likely or expected pattern.
+- **Step 2: Put in a mutation / error in codon and get score (e.g., ATC).**
+  - **Explanation:** We introduce a single nucleotide change within a codon, creating a sequence that might still be a valid codon but could code for a different amino acid or even a stop signal. We observe the score assigned to this mutated sequence. If the model understands the importance of codons, the score might be lower than the correct codon sequence (Step 1).
+- **Step 3: Look at the change in score on the heatmap.**
+  - **Explanation:** This suggests visualizing the scores for various correct and mutated codon sequences on a heatmap. The heatmap would likely show different intensity levels (colors) corresponding to the scores. Correct codons should ideally have a distinct scoring pattern compared to those with errors.
+- **Model Interpretation:** The model should assign lower scores (or higher perplexity) to sequences that are syntactically incorrect with respect to codon structure.
+- **Analogy:** If a language model understands English words, it will likely assign a higher probability to "The cat sat" compared to "The cta sat" because the latter has a misspelled word. Similarly, Evo2, if it understands codons, should "recognize" and score valid codon sequences differently from those with single nucleotide errors that disrupt the triplet structure.
+- **Confirmation:** This way, we can confirm that Evo2 has picked up on what a codon is. Basically, if a sequence looks like the protein is "spelled incorrectly" (due to mutations disrupting codons), the model should know.
