@@ -85,3 +85,59 @@ It is a massive genomic dataset designed specifically for training advanced DNA 
 It can be used to train deep learning models that understand the "language" of DNA sequences. These models can learn patterns, structures, and relationships within genomic data that might not be obvious through traditional analysis methods.
 
 ### Training of the Evo2
+
+### Training Process of Evo2
+
+Evo2’s training was divided into **two stages**:
+
+#### 1. **Pretraining** (8k token context)
+
+- The base Evo2 model was trained on sequences with a maximum length of **8,000 nucleotides.**
+- Focuses on **smaller-scale DNA grammar**, e.g.:
+  - tRNA
+  - Bacterial genes
+  - Non-coding RNA (ncRNA)
+  - Operons (gene clusters in prokaryotes)
+- Learns **basic features** in:
+  - Smaller genes
+  - Subsections of larger genes
+- Efficient at discovering **short, local patterns** in DNA.
+
+**Analogy**:  
+Reading **one page at a time** instead of trying to understand an entire book at once.  
+This helps the model **learn small patterns more effectively**.
+
+#### 2. **Midtraining** (Extended context up to 1 million tokens)
+
+- Context window is extended to handle **up to 1 million nucleotides**
+- Enables learning across **larger biological structures**, including:
+  - Eukaryotic genes
+  - Phage genomes
+  - Organelles (like mitochondria)
+  - Human TADs (Topologically Associating Domains)
+  - Yeast chromosomes
+  - Entire bacterial or minimal genomes (e.g., _M. genitalium_)
+
+📏 Evo2 learns **across scales**:  
+From tiny functional units → to whole-genome architecture.
+
+---
+
+### Biological Concepts Used in Evo2
+
+#### DNA Basics
+
+- DNA is made up of four nucleotides: **A, T, C, G**
+- DNA is read in sequences, often in groups of **three bases** called **codons**
+
+#### What are Codons?
+
+- A **codon** is a sequence of **three nucleotides** that codes for a single **amino acid**
+- Used to **translate DNA into proteins**
+- Start and stop codons **signal** the beginning and end of a protein-coding region
+
+#### Example DNA Sequence:
+
+```text
+ATGATGCCCGATATG
+```
