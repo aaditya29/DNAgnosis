@@ -251,3 +251,51 @@ print('Shape (batch, length, vocab): ', logits.shape)
 This code doesn't directly output probabilities or likelihoods in a normalized way (like between 0 and 1). Instead, it outputs **logits**. Logits are the raw, unnormalized scores from the model's final layer.
 
 To get probabilities (which represent the likelihood of each possible next nucleotide), you would typically apply a **softmax function** along the last dimension (the vocabulary dimension) of the `logits` tensor. The softmax function converts these raw scores into a probability distribution where the values sum up to 1.
+
+## Understanding Introns and Exons in DNA
+
+### DNA, Exons, and Introns
+
+**DNA is a long sequence:** Our genetic material, DNA, is a very long molecule composed of a sequence of nucleotides.
+
+**Exons are part of the gene that contains valid coding sequence (so what is needed to e.g., build a protein):**
+
+- Think of exons as the **important parts** of a gene that carry the instructions for building a protein.
+- When a gene is read to make a protein, the information in the exons is pieced together to form the messenger RNA (mRNA), which then serves as the template for protein synthesis.
+
+**Introns are parts in the gene between exons that doesn't code for the protein, but are just there:**
+
+- Introns are **non-coding regions** of a gene, meaning they do not contain the instructions for building a protein.
+- They are located _between_ the exons.
+- The image uses a helpful analogy: **"If watching a movie, introns would be ads in the movie."** Just like ads are present within a movie but are not part of the main story, introns are present within a gene but are not part of the protein-coding instructions.
+
+### From Gene to Mature mRNA: The Splicing Process
+
+Now we will see how the information from a gene is processed to produce the mature mRNA that is used to make a protein:
+
+- **pre-mRNA (precursor messenger RNA):** When a gene is first copied from DNA, the resulting RNA molecule is called pre-mRNA. It contains both exons and introns.
+
+- **Splicing:** Before the mRNA can be used to make a protein, the introns are removed in a process called **splicing**. The exons are then joined together to form a continuous coding sequence.
+
+- **mature mRNA (messenger RNA):** The mRNA molecule after the introns have been removed and the exons have been joined is called mature mRNA.
+
+- **Untranslated Region (UTR):** The mature mRNA also contains regions at the beginning (5' UTR) and end (3' UTR) that are not directly translated into protein. These regions (shown in dark gray) can have regulatory functions, affecting how the mRNA is translated.
+
+- **Coding Sequence (CDS):** The part of the mature mRNA that contains the sequence of codons that will be translated into the amino acid sequence of the protein is called the coding sequence (CDS) (shown in red segments).
+
+### Length of Introns and Implications for Model Training
+
+**Introns can be really short or really long.**
+
+This difference in length has implications for how a model like Evo2 learns patterns in DNA:
+
+**Short introns are learned in pre-training.** During the initial pre-training phase, where the Evo2 model had a limited context window (as discussed in the previous notes), it could learn the patterns and characteristics of shorter introns because they fall within that window.
+
+**Long introns are learned in mid-training.** When the context window of Evo2 was expanded during the mid-training phase, the model could then learn to understand the features and potential regulatory roles of much longer introns, which span a greater distance in the DNA sequence.
+
+## Importance for Variant Effect Prediction
+
+Understanding introns and exons is crucial for predicting the effects of mutations:
+
+- **Mutations in Exons:** Mutations in exons can directly alter the protein sequence, potentially leading to changes in protein structure and function, and thus causing disease.
+- **Mutations in Introns:** While introns do not code for protein, they can contain regulatory elements that influence gene expression (e.g., how much of a protein is made). Mutations in these intronic regions can disrupt these regulatory elements, also leading to disease. Additionally, mutations near the exon-intron boundaries can interfere with the splicing process, leading to abnormal mRNA and non-functional proteins.
