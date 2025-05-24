@@ -299,3 +299,93 @@ Understanding introns and exons is crucial for predicting the effects of mutatio
 
 - **Mutations in Exons:** Mutations in exons can directly alter the protein sequence, potentially leading to changes in protein structure and function, and thus causing disease.
 - **Mutations in Introns:** While introns do not code for protein, they can contain regulatory elements that influence gene expression (e.g., how much of a protein is made). Mutations in these intronic regions can disrupt these regulatory elements, also leading to disease. Additionally, mutations near the exon-intron boundaries can interfere with the splicing process, leading to abnormal mRNA and non-functional proteins.
+
+### How To Find We Are in Introns or Exons: `Embeddings`
+
+**Evo2** is a powerful DNA language model that understands the biological grammar of life. By learning from billions of DNA sequences across species, Evo2 can predict the effects of mutations—on proteins, RNAs, and even the fitness of entire organisms.
+
+At its core, Evo2 is a **sequence likelihood model** trained on DNA. Like a language model for genomics, it converts raw sequences (A, T, G, C) into **numerical vectors**, also known as embeddings. These embeddings capture context—much like how word embeddings in NLP capture the meaning of words in a sentence.
+
+These embeddings can then power a wide variety of **downstream tasks**, such as:
+
+- Predicting the fitness effects of mutations
+- Classifying exons vs introns at single-nucleotide resolution
+- Estimating gene essentiality (i.e., whether a gene is critical for survival)
+
+Evo2 doesn’t just memorize—it generalizes across evolutionary space, species, and mutation types.
+
+---
+
+#### From Likelihood to Fitness: Navigating the Mutational Landscape
+
+One of Evo2's foundational capabilities is to **predict how mutations affect sequence likelihood**.
+
+The approach is simple but powerful:
+
+- Given a **wild-type (WT)** DNA sequence, Evo2 assigns a likelihood score.
+- Then, it introduces a mutation and measures how much that likelihood drops.
+- The **greater the drop**, the **less biologically plausible** the mutated sequence becomes.
+
+This lets us build a **fitness landscape**, highlighting which mutations are tolerated and which are deleterious.
+
+> Biologically meaningful regions—start codons, ribosome-binding sites, and early coding positions—are typically **less tolerant** to mutation and show **larger drops** in likelihood.
+
+---
+
+#### Mutation Sensitivity Across Life: Evo2 Generalizes
+
+To test Evo2’s biological intuition, researchers evaluated how mutations in different genomic elements affect model likelihoods across species.
+
+- For prokaryotes and archaea, mutations in structured elements like rRNA or start codons caused large likelihood drops.
+- In eukaryotes, a similar trend emerged across animals, plants, fungi, and protists.
+
+Evo2 reflects **evolutionary constraints**: mutations in highly conserved regions are more likely to be penalized.
+
+---
+
+#### Zero-Shot Fitness Prediction: No Training, Still Accurate
+
+Evo2 supports **zero-shot** prediction, meaning it can predict fitness effects of mutations without needing retraining for each new task or species.
+
+As shown in its paper, it was benchmarked against various models on protein and RNA mutation data, and consistently outperformed them:
+
+- For bacterial and human proteins, Evo2's zero-shot fitness predictions showed the **highest Spearman correlation** with experimental assays.
+- Evo2 also performed well in predicting **ncRNA mutation effects**, a task most models struggle with.
+
+> Evo2 doesn't just memorize—it understands and **generalizes** mutation effects across molecular types and organisms.
+
+---
+
+#### Classifying Exons Using Evo2 Embeddings
+
+What if we want to know whether a particular base in the genome lies in an exon or an intron?
+
+Enter **embedding-based exon classification**.
+
+Here’s how it works:
+
+1. Pass a DNA sequence through Evo2 and extract embeddings for each base.
+2. Train a **simple binary classifier** using these embeddings to label each position as `exon` or `not exon`.
+3. Visualize this across genomic loci to detect exon boundaries with high accuracy.
+
+> This shows that Evo2 embeddings carry rich positional and functional signals—even though Evo2 wasn’t explicitly trained for this task.
+
+---
+
+#### Predicting Essential Genes and lncRNAs
+
+Beyond exons, Evo2 embeddings help predict whether genes are **essential**—that is, whether knocking them out disrupts cellular survival.
+
+Two experiments show this clearly:
+
+1. **Prokaryotic gene essentiality**:
+
+   - Introducing **premature stop codons** in a gene and measuring the drop in Evo2 likelihood helps identify essential genes.
+   - Evo2’s predictions aligned well with experimental gene knockout data across bacteria and phages.
+
+2. **Human lncRNA essentiality**:
+
+   - Researchers scrambled segments of long non-coding RNAs and used Evo2 to detect which were essential in human cells.
+   - Again, Evo2 led the pack in AUROC, outperforming baselines like GC content, gene age, and transcript length.
+
+---
