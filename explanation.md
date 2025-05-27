@@ -486,3 +486,87 @@ During pre-training, if introns are long, than the model won't learn much about 
 -Learns relations between genes, different genes might be related.
 
 -To teach the model to be able to generate full sequences longer than just the 8k context window, the model should also be trained hereon.
+
+## Regulator Genes
+
+In the vast network of genes that make up an organism’s DNA, not all genes produce proteins directly. Some genes have a more subtle, yet critically important role—they **regulate** the expression of other genes. These are known as **regulator genes**.
+
+---
+
+#### What Are Regulator Genes?
+
+A **regulator gene** is a gene whose primary function is to **control the expression of one or more other genes**. Instead of producing structural proteins, regulator genes typically encode **regulatory proteins**, like:
+
+- **Repressors**
+- **Activators**
+- **Transcription factors**
+
+These proteins influence whether a target gene is turned **on** or **off**, and to what **extent** it is expressed.
+
+---
+
+### Why Are They Important?
+
+Think of the genome like a massive orchestra:
+
+- **Structural genes** are like instruments—they produce the music (proteins).
+- **Regulator genes** are the **conductor**—they decide which instruments play, when, and how loudly.
+
+Without regulator genes, cells would randomly express all genes at all times, leading to chaos instead of order. Regulation is **crucial** for:
+
+- Ensuring **timely gene expression** during development (e.g., when a fetus forms organs in stages).
+- Allowing **adaptive responses** to the environment (e.g., bacteria activating stress response genes in hostile conditions).
+- Maintaining **cellular identity** (e.g., skin cells and neurons express different genes even though they have the same DNA).
+
+---
+
+### Types of Regulator Genes
+
+1. **Repressor Genes**
+
+   - Produce proteins that **block transcription** of specific genes.
+   - Example: In bacteria, the **lac repressor** binds to the operator region of the lac operon to prevent lactose-digesting enzymes from being made when lactose is absent.
+
+2. **Activator Genes**
+
+   - Encode proteins that **enhance transcription** of specific genes.
+   - Example: The **CAP protein** in E. coli helps RNA polymerase bind to DNA when glucose levels are low, activating alternative sugar metabolism.
+
+3. **Transcription Factor Genes**
+
+   - Often found in eukaryotes, they encode proteins that bind to **promoter** or **enhancer** regions of DNA to regulate transcription.
+   - Can act as activators or repressors depending on context.
+
+4. **Regulator RNA Genes**
+
+   - Some regulator genes don’t encode proteins at all, but RNA molecules that regulate gene expression (e.g., **miRNAs**, **lncRNAs**).
+   - These RNAs may degrade mRNA or prevent translation.
+
+---
+
+### How Do Regulator Genes Work?
+
+Most regulatory control happens at the **transcriptional level**—before a gene is transcribed into mRNA. Here’s how a typical regulator gene works:
+
+1. It gets **transcribed and translated** into a regulatory protein.
+2. That protein **binds to specific DNA sequences** in the promoter or operator region of the target gene.
+3. This **modulates the activity** of RNA polymerase:
+
+   - **Blocked access** → gene is silenced (repressed)
+   - **Eased access** → gene is turned on (activated)
+
+The specificity is based on **DNA-binding motifs** in the regulatory proteins—like keys fitting into specific locks.
+
+---
+
+### Real-World Analogy
+
+Think of regulator genes as **traffic control systems** in a city:
+
+- Green light = gene turned on (activated)
+- Red light = gene turned off (repressed)
+- Timing, intensity, and coordination = critical for traffic (protein production) to flow smoothly.
+
+Without traffic signals (regulator genes), you’d have accidents, gridlock, or wasted fuel—mirroring how unregulated gene expression leads to disease or inefficient cell behavior.
+
+---
