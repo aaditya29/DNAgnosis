@@ -520,30 +520,6 @@ Without regulator genes, cells would randomly express all genes at all times, le
 
 ---
 
-### Types of Regulator Genes
-
-1. **Repressor Genes**
-
-   - Produce proteins that **block transcription** of specific genes.
-   - Example: In bacteria, the **lac repressor** binds to the operator region of the lac operon to prevent lactose-digesting enzymes from being made when lactose is absent.
-
-2. **Activator Genes**
-
-   - Encode proteins that **enhance transcription** of specific genes.
-   - Example: The **CAP protein** in E. coli helps RNA polymerase bind to DNA when glucose levels are low, activating alternative sugar metabolism.
-
-3. **Transcription Factor Genes**
-
-   - Often found in eukaryotes, they encode proteins that bind to **promoter** or **enhancer** regions of DNA to regulate transcription.
-   - Can act as activators or repressors depending on context.
-
-4. **Regulator RNA Genes**
-
-   - Some regulator genes don’t encode proteins at all, but RNA molecules that regulate gene expression (e.g., **miRNAs**, **lncRNAs**).
-   - These RNAs may degrade mRNA or prevent translation.
-
----
-
 ### How Do Regulator Genes Work?
 
 Most regulatory control happens at the **transcriptional level**—before a gene is transcribed into mRNA. Here’s how a typical regulator gene works:
