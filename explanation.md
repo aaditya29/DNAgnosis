@@ -635,3 +635,20 @@ The key insight is that the relationship (the angle between the vectors) remains
 3. **Calculating the Delta Score:** Our entire prediction hinges on comparing a reference sequence to a variant sequence that differs by only one nucleotide. RoPE is critical here because it helps the model understand that the two sequences are identical except for a change at one specific position. It preserves all the relative positional information of the surrounding DNA allowing the model to isolate the effect of that single change when it calculates the likelihood scores.
 
 In summary we are using RoPE implicitly every time we call `model.score_sequences`. It's the internal mechanism within the Evo2 model that provides the crucial positional awareness needed to interpret a long DNA sequence and assess the impact of a tiny change within it.
+
+### Interpolation in RoPE
+
+Interpolation is a technique that allows the model to handle sequences that are longer than the ones it saw during its training phase without a significant loss in performance.
+
+#### How it Works: Stretching the Rotation
+
+During training on a sequence of 8,192 positions the model might learn to apply rotations in steps say from 0 degrees up to a maximum of 360 degrees covering the full training window.
+
+- **Original (8k context):** Position `n` gets rotated by a certain angle.
+- **Interpolated (16k context):** The model adjusts its internal math so that what was previously the rotation for position `n` is now applied to position `2n`. The angles between positions are effectively squished closer together to cover the longer distance.
+
+This means the model can still use its learned understanding of relative positions just over a larger scale.
+
+#### Why This Matters for Our Project
+
+The Evo2 model we use comes in different versions. For example `evo2_7b_base` was trained with an 8,192 context length but the `evo2_7b` model extends that to 1 million base pairs. This context extension is made possible by techniques like interpolation.
