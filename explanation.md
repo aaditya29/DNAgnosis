@@ -652,3 +652,43 @@ This means the model can still use its learned understanding of relative positio
 #### Why This Matters for Our Project
 
 The Evo2 model we use comes in different versions. For example `evo2_7b_base` was trained with an 8,192 context length but the `evo2_7b` model extends that to 1 million base pairs. This context extension is made possible by techniques like interpolation.
+
+---
+
+## Learning About Evo2: A Foundation Model for Genome Science
+
+Of course. Here is an explanation of the image, formatted and written to be directly included in a `README.md` file.
+
+---
+
+## Evo2: A Foundation Model for Genome Science
+
+Evo2 is a versatile foundation model for DNA capable of tackling a wide range of genomic tasks. Its core strength lies in understanding the fundamental language of DNA allowing it to be applied to various problem, from analysis to design. The model supports four primary use cases:
+
+#### 1. Zero-Shot Variant Effect Prediction (VEP)
+
+This is the core function used in our application. It predicts the impact of a genetic variant without being specifically trained on that variant.
+
+- **How it works**: The model is given two sequences: the original **reference** DNA and the **alternative** DNA containing the variant.
+- **Output**: Evo2 calculates a **delta log-likelihood score** which measures how much less likely or unnatural the variant sequence is compared to the reference. A negative score suggests a potential loss of function indicating that the variant may be pathogenic.
+
+#### 2. In-Context Learning for Sequence-to-Sequence Tasks
+
+Evo2 can perform new tasks by learning from a few examples provided in a **prompt** a capability known as in-context learning.
+
+- **How it works**: You provide the model with a prompt containing examples such as mapping a DNA sequence to its known biological function (e.g., `DNA_SEQ_1 -> FUNCTION_1`).
+- **Output**: When given a new unseen DNA sequence the model uses the examples to predict its corresponding function. This is useful for tasks like identifying regulatory elements or classifying protein functions.
+
+#### 3. Unsupervised Discovery of Functional Elements
+
+The model can identify meaningful patterns in raw DNA without any labels.
+
+- **How it works**: A long DNA sequence is fed into Evo2 to generate high-dimensional numerical representations called **embeddings**.
+- **Output**: By clustering these embeddings functionally similar regions of DNA group together. This allows for the unsupervised discovery of important genomic features like exons, introns or enhancers.
+
+#### 4. Controllable Generation of Novel Sequences
+
+Evo2 can be used as a design tool to generate new DNA sequences with desired properties.
+
+- **How it works**: You can guide the generation process with a **prompt** that includes specific tags, such as a **species tag** (e.g., `E. coli`) or a **functional tag** (e.g., promoter).
+- **Output**: The model generates a novel DNA sequence that is predicted to have the specified characteristics opening up possibilities for synthetic biology and genetic engineering.
