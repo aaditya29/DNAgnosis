@@ -546,3 +546,21 @@ Think of regulator genes as **traffic control systems** in a city:
 Without traffic signals (regulator genes), you’d have accidents, gridlock, or wasted fuel—mirroring how unregulated gene expression leads to disease or inefficient cell behavior.
 
 ---
+
+## Why We Using Mutli Species and not just Human DNA?
+
+Imagine you wanted to become an expert in the English language. You could read every book ever published by a single author from a certain country or your local area. You would become an expert in that author's specific style, vocabulary, and tone.
+
+But a better approach would be to read literature spanning centuries from Shakespeare to modern poetry, from scientific papers to novels which are written by people all over the world. By doing this you wouldn't just learn one style but also you would learn the fundamental **grammar, syntax, and principles** of the English language itself. You'd understand which words and structures are core to the language and which are merely stylistic flair.
+
+### From Language to DNA
+
+This is exactly what Evo2 does with DNA.
+
+1.  **Discovering "Conserved" Regions:** Life uses the same basic building blocks. Critical genes and functional regions of DNA are often "evolutionarily conserved" meaning they have remained remarkably similar across millions of years and countless species. For example a part of a gene essential for cellular respiration in humans might look very similar to its counterpart in yeast or even bacteria. By training on a dataset with trillions of tokens from thousands of species Evo2 learns to recognize these deeply conserved functionally critical patterns.
+
+2.  **Understanding Functional Importance:** When the model analyzes a human gene like `BRCA1` it isn't just looking at it in isolation. It has learned from its vast training that certain sequences within that gene are highly conserved across the tree of life. If a user wants to analyze a Single Nucleotide Variant (SNV) that falls within one of these conserved regions the model "knows" that this position is extremely important. A change there is much more likely to be disruptive and therefore **pathogenic**.
+
+3.  **Context is Everything:** If the model were trained only on human DNA it would learn what a typical human gene looks like. But it would have a much weaker signal for why it looks that way. The multi-species data provides the crucial evolutionary context. It allows the model to differentiate between parts of the genome that can change without consequence and those that must be preserved for life to function correctly.
+
+4.  We learn what parts of DNA change a lot across species, and which stay very similar. The parts that often stays similar should be more functionally important so variations in these are more likely to be harmful.
