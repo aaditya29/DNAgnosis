@@ -250,7 +250,7 @@ print('Shape (batch, length, vocab): ', logits.shape)
 
 This code doesn't directly output probabilities or likelihoods in a normalized way (like between 0 and 1). Instead, it outputs **logits**. Logits are the raw, unnormalized scores from the model's final layer.
 
-To get probabilities (which represent the likelihood of each possible next nucleotide), you would typically apply a **softmax function** along the last dimension (the vocabulary dimension) of the `logits` tensor. The softmax function converts these raw scores into a probability distribution where the values sum up to 1.
+To get probabilities (which represent the likelihood of each possible next nucleotide) we would typically apply a **softmax function** along the last dimension (the vocabulary dimension) of the `logits` tensor. The softmax function converts these raw scores into a probability distribution where the values sum up to 1.
 
 ## Understanding Introns and Exons in DNA
 
@@ -267,7 +267,7 @@ To get probabilities (which represent the likelihood of each possible next nucle
 
 - Introns are **non-coding regions** of a gene, meaning they do not contain the instructions for building a protein.
 - They are located _between_ the exons.
-- The image uses a helpful analogy: **"If watching a movie, introns would be ads in the movie."** Just like ads are present within a movie but are not part of the main story, introns are present within a gene but are not part of the protein-coding instructions.
+- Using analogy we can understand this by **"If watching a movie, introns would be ads in the movie."** Just like ads are present within a movie but are not part of the main story, introns are present within a gene but are not part of the protein-coding instructions.
 
 ### From Gene to Mature mRNA: The Splicing Process
 
@@ -489,7 +489,7 @@ During pre-training, if introns are long, than the model won't learn much about 
 
 ## Regulator Genes
 
-In the vast network of genes that make up an organism’s DNA, not all genes produce proteins directly. Some genes have a more subtle, yet critically important role—they **regulate** the expression of other genes. These are known as **regulator genes**.
+In the vast network of genes that make up an organism’s DNA, not all genes produce proteins directly. Some genes have a more subtle and critically important role they **regulate** the expression of other genes. These are known as **regulator genes**.
 
 ---
 
