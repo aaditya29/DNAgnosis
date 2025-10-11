@@ -609,3 +609,29 @@ Now we learn about one-time "pre-training" process that created the Evo2 model.
 3. **The Model Architecture:** The underlying engine is Evo2 which is built on the StripedHyena architecture. This is a modern AI architecture designed to be very efficient at processing extremely long sequences, which is perfect for DNA.
 
 In summary the training pipeline is a massive one-off effort to build the model's general biological intelligence.
+
+---
+
+## Embeddings and Rotary Positional Embeddings (RoPE)
+
+Rotary Positional Embeddings (RoPE) are a core component of the underlying Evo2 model we use but it's not something we implement directly in our own backend code. Instead we benefit from it every time we call the model. It's a clever method for giving the model a sense of order and position for each nucleotide in a DNA sequence.
+
+### Learning about Rotary Positional Embeddings (RoPE)
+
+Imagine we have a list of cities: `[Paris, London, Rome]`. A simple embedding might represent each city as a point on a map. But how does the model know that "London" came after "Paris" and before "Rome" in this specific list?
+
+- **Old Method (Absolute Embeddings):** We can add another number to each city's data like `[Paris, 1]`, `[London, 2]`, `[Rome, 3]`. This works but it can be rigid. The model has to learn what "position 3" means from scratch.
+
+- **RoPE Method (Relative Embeddings):** RoPE works more like a compass. Instead of adding a coordinate it rotates the vector for each word based on its position. Paris at position 1 might be rotated by 15 degrees. London at position 2 is rotated by 30 degrees and so on.
+
+The key insight is that the relationship (the angle between the vectors) remains the same no matter where they appear in the sequence. The model learns that if one vector is rotated 15 degrees relative to another it means they are one position apart. This makes it excellent at understanding relative positioning.
+
+### How It's Used in Our Project
+
+1. **Architectural Component:** RoPE is built into the `StripedHyena/Evo2` architecture that we use. We don't see it in our main.py file but it's happening under the hood.
+
+2. **Processing Long DNA Sequences:** When our backend fetches the 8192-base-pair window of DNA it needs to understand the precise location of every single nucleotide. RoPE allows the model to encode the position of a nucleotide at position 4000 just as easily as one at position 10.
+
+3. **Calculating the Delta Score:** Our entire prediction hinges on comparing a reference sequence to a variant sequence that differs by only one nucleotide. RoPE is critical here because it helps the model understand that the two sequences are identical except for a change at one specific position. It preserves all the relative positional information of the surrounding DNA allowing the model to isolate the effect of that single change when it calculates the likelihood scores.
+
+In summary we are using RoPE implicitly every time we call `model.score_sequences`. It's the internal mechanism within the Evo2 model that provides the crucial positional awareness needed to interpret a long DNA sequence and assess the impact of a tiny change within it.
