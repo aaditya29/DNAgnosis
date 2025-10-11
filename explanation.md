@@ -564,3 +564,48 @@ This is exactly what Evo2 does with DNA.
 3.  **Context is Everything:** If the model were trained only on human DNA it would learn what a typical human gene looks like. But it would have a much weaker signal for why it looks that way. The multi-species data provides the crucial evolutionary context. It allows the model to differentiate between parts of the genome that can change without consequence and those that must be preserved for life to function correctly.
 
 4.  We learn what parts of DNA change a lot across species, and which stay very similar. The parts that often stays similar should be more functionally important so variations in these are more likely to be harmful.
+
+---
+
+## Training
+
+### Training Data Distribution
+
+We train data in such way that far more tokens are consumed during pre-training.
+
+- During pre-training the model needs to learn everything from scratch
+- Mid-training: adapting to patterns that happens only on a larger scale
+
+### Training Architecture
+
+All the code for running and building the model are present in [this](https://github.com/arcinstitute/evo2) open source repository and actual architecture is based on [Striped-Hyena-2](https://github.com/Zymrael/savanna/blob/main/paper.pdf)
+
+### How Inference and Training is Done?
+
+#### Inference: Zero-Shot Variant Effect Prediction
+
+Now we learn what our web application does every time you click "Analyze variant." It's called "zero-shot" because the model is making a prediction for a specific variant it has never explicitly been trained on.
+
+1. **Input Alleles:** The process starts with the two key pieces of information for any SNV: the Reference Allele (the nucleotide in the standard human genome) and the Alternative Allele (the variant nucleotide).
+
+2. **Get Flanking Sequence:** To give the model context the application fetches the DNA sequence surrounding the variant's position from the `hg38` human reference genome. Our main.py code does this by calling the UCSC Genome Browser API.
+
+3. **Construct Sequences:** Two separate DNA sequences are created. Both are identical except for the single nucleotide at the variant's position. One has the reference allele, and the other has the alternative allele.
+
+4. **Score with Evo2:** Both of these complete sequences are fed into the pre-trained Evo2 model. The model's job is to calculate a log-likelihood score for each sequence. This score represents how probable or biologically natural the model thinks a given DNA sequence is based on the vast amount of data it was trained on.
+
+5. **Calculate Delta Score:** The final step is to subtract the reference score from the alternative score. This difference the Delta log-likelihood is the crucial output. A negative score suggests the variant makes the DNA sequence "less likely" or more dysfunctional indicating it is potentially pathogenic.
+
+6. **Pathogenicity Prediction:** Based on this delta score the application makes a final call like **Likely pathogenic** or **Likely benign**.
+
+#### Training: Learning the Language of DNA
+
+Now we learn about one-time "pre-training" process that created the Evo2 model.
+
+1. **Training Data:** The model was not just trained on human DNA. It was trained on the OpenGenome2 dataset which contains DNA from all domains of life: bacteria, archaea, eukaryotes (like humans, plants, and fungi) and viruses.
+
+2. **Pre-training Objective:** The model learns via autoregressive next-token prediction. This is the same technique used by text-based LLMs like GPT. The model is given a piece of a DNA sequence and its only goal is to predict the very next nucleotide. It does this billions of times adjusting its internal parameters with each guess to get better.
+
+3. **The Model Architecture:** The underlying engine is Evo2 which is built on the StripedHyena architecture. This is a modern AI architecture designed to be very efficient at processing extremely long sequences, which is perfect for DNA.
+
+In summary the training pipeline is a massive one-off effort to build the model's general biological intelligence.
