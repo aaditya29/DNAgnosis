@@ -5,8 +5,7 @@ evo2_image = (
     modal.Image.from_registry(
         # Use official CUDA image with Python 3.12
         "nvidia/cuda:12.4.0-devel-ubuntu22.04",
-        add_python="3.12",
-        force_build=True
+        add_python="3.12"
     )
     .apt_install([
         "build-essential",
