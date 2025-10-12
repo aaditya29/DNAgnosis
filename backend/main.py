@@ -231,4 +231,4 @@ def brca1_example():
 
 @app.local_entrypoint()
 def main():
-    brca1_example().local()  # call the example function
+    brca1_example.local()  # call the example function
