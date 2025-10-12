@@ -210,14 +210,25 @@ def run_brca1_analysis():
     plt.ylabel('BRCA1 SNV class')
     plt.tight_layout()
 
-    buffer = BytesIO()
-    plt.savefig(buffer, format="png")
-    buffer.seek(0)
-    plot_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    buffer = BytesIO()  # create a bytes buffer for the plot
+    plt.savefig(buffer, format="png")  # save the plot to the buffer
+    buffer.seek(0)  # rewind the buffer to the beginning
+    plot_data = base64.b64encode(buffer.getvalue()).decode(
+        "utf-8")  # encode plot to base64 string
 
+    # return results as dictionary
     return {'variants': brca1_subset.to_dict(orient="records"), "plot": plot_data, "auroc": auroc}
+
+
+@app.function()  # configure app function
+def brca1_example():
+    print("Running BRCA1 analysis with EVO2 example...")
+
+    # running inference function
+    returns = run_brca1_analysis().remote()
+    print("BRCA1 analysis completed.")
 
 
 @app.local_entrypoint()
 def main():
-    run_brca1_analysis.local()
+    brca1_example().local()  # call the example function
