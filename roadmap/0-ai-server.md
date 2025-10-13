@@ -118,7 +118,7 @@ This means **no manual setup** and **no idle billing** with a much faster dev lo
 
 ### **Building the Evo2 Image**
 
-Let’s look at the code that sets up the environment:
+Now we are going to look at the code that sets up the environment in out [`main.py`](https://github.com/aaditya29/DNAgnosis/blob/main/backend/main.py) function:
 
 ```python
 evo2_image = (
