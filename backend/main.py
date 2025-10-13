@@ -294,6 +294,34 @@ def get_genome_sequence(position, genome: str, chromosome: str, window_size=8192
     return sequence, start
 
 
+# configuring class for GPU usage
+@app.cls(gpu="H100", volumes={mount_path: volume}, max_containers=3, retries=2, scaledown_window=120)
+class Evo2Model:
+    @modal.enter()
+    def load_evo2_model(self):
+        from evo2 import Evo2
+        print("Loading Evo2 model!!!")
+        self.model = Evo2('evo2_7b')  # loading the 7B parameter model
+        print("Evo2 model loaded.")
+
+    @modal.method()  # method to score sequences
+    def analyze_single_variant(self, variant_position: int, alternative: str, genome: str, chromosome: str):
+        print("Analyzing single variant with Evo2 model!!!")
+        print("Genome:", genome)
+        print("Chromosome:", chromosome)
+        print("Variant position:", variant_position)
+        print("Alternative variant allele:", alternative)
+
+        WINDOW_SIZE = 8192  # size of sequence window around SNV
+        window_seq, seq_start = get_genome_sequence(
+            position=variant_position, genome=genome, chromosome=chromosome, window_size=WINDOW_SIZE)
+
+        print("Window sequence:", window_seq)
+        print("Sequence start position:", seq_start)
+
+
 @app.local_entrypoint()
 def main():
-    brca1_example.local()  # call the example function
+    evo2Model = Evo2Model()
+    evo2Model.analyze_single_variant.remote(
+        variant_position=43119628, alternative='G', genome='hg38', chromosome='chr17')
