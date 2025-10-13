@@ -255,6 +255,45 @@ def brca1_example():
         plt.show()
 
 
+# function to fetch genome sequence from UCSC API
+def get_genome_sequence(position, genome: str, chromosome: str, window_size=8192):
+    import requests  # for making HTTP requests
+
+    half_window = window_size // 2  # half window size
+    start = max(0, position - 1 - half_window)  # start coordinate (0-indexed)
+    # end coordinate (0-indexed, exclusive)
+    end = position - 1 + half_window + 1
+
+    print(
+        f"Fetching {window_size}bp window size around position {position} from UCSC API!")
+    print(f"Coordinates: {chromosome}:{start}-{end} ({genome})")
+
+    api_url = f"https://api.genome.ucsc.edu/getData/sequence?genome={genome};chrom={chromosome};start={start};end={end}"
+    response = requests.get(api_url)  # making GET request to UCSC API
+
+    if response.status_code != 200:
+        raise Exception(
+            f"Failed to load genome sequence from UCSC API: {response.status_code}")
+
+    genome_data = response.json()  # parsing JSON response
+
+    if "dna" not in genome_data:
+        error = genome_data.get("error", "Unknown error")
+        raise Exception(f"UCSC API errpr: {error}")
+
+    # getting DNA sequence and converting to uppercase
+    sequence = genome_data.get("dna", "").upper()
+    expected_length = end - start  # expected length of the sequence
+    if len(sequence) != expected_length:
+        print(
+            f"Warning: received sequence length ({len(sequence)}) differs from expected length of ({expected_length})")
+
+    print(
+        f"Loaded reference genome sequence window (length: {len(sequence)} bases)")
+
+    return sequence, start
+
+
 @app.local_entrypoint()
 def main():
     brca1_example.local()  # call the example function
