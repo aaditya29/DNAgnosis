@@ -315,9 +315,16 @@ class Evo2Model:
         WINDOW_SIZE = 8192  # size of sequence window around SNV
         window_seq, seq_start = get_genome_sequence(
             position=variant_position, genome=genome, chromosome=chromosome, window_size=WINDOW_SIZE)
+        print(f"Fetched genome seauence window, first 100: {window_seq[:100]}")
 
-        print("Window sequence:", window_seq)
-        print("Sequence start position:", seq_start)
+        relative_pos = variant_position - 1 - seq_start
+        print(f"Relative position within window: {relative_pos}")
+
+        if relative_pos < 0 or relative_pos >= len(window_seq):
+            raise ValueError(
+                f"Variant position {variant_position} is outside the fetched window (start={seq_start+1}, end={seq_start+len(window_seq)})")
+        reference = window_seq[relative_pos]
+        print("Reference is: " + reference)
 
 
 @app.local_entrypoint()
