@@ -294,6 +294,25 @@ def get_genome_sequence(position, genome: str, chromosome: str, window_size=8192
     return sequence, start
 
 
+def analyze_single_variant(relative_pos_in_window, reference, alternative, window_seq, model):
+    var_seq = window_seq[:relative_pos_in_window] + alternative + \
+        window_seq[relative_pos_in_window+1:]  # creating variant sequence
+    ref_score = model.score_sequences(
+        [window_seq])[0]  # scoring reference sequence
+    var_score = model.score_sequences([var_seq])[0]  # scoring variant sequence
+    delta_score = var_score - ref_score  # calculating delta score for the variant
+    """calculating threshold for confidence estimation
+    during inference we want an output that is either "Likely Benign", "Uncertain" or "Likely Pathogenic.
+    A numerical score won't be able to tell us that directly, so we set a threshold based on the training data.
+    We will define a threshold such that:
+    - if score is above the threshold then it is pathogenic otherwise benign
+    - if the numer is too low then too many variants will be classified as benign
+    - if the number is too high then too many variants will be classified as pathogenic when they are not.
+    For defining that number we can use the BRCA1 dataset and find a threshold that maximizes the separation
+    
+    """
+
+
 # configuring class for GPU usage
 @app.cls(gpu="H100", volumes={mount_path: volume}, max_containers=3, retries=2, scaledown_window=120)
 class Evo2Model:
@@ -315,7 +334,7 @@ class Evo2Model:
         WINDOW_SIZE = 8192  # size of sequence window around SNV
         window_seq, seq_start = get_genome_sequence(
             position=variant_position, genome=genome, chromosome=chromosome, window_size=WINDOW_SIZE)
-        print(f"Fetched genome seauence window, first 100: {window_seq[:100]}")
+        print(f"Fetched genome sequence window first 100: {window_seq[:100]}")
 
         relative_pos = variant_position - 1 - seq_start
         print(f"Relative position within window: {relative_pos}")
