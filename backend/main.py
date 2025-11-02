@@ -48,6 +48,7 @@ evo2_image = (
         "pip install 'transformer_engine[pytorch]==1.13' --no-build-isolation || echo 'transformer_engine installation skipped'"
     )
     .pip_install_from_requirements("requirements.txt")
+    .pip_install("fastapi[standard]")  # for API endpoint
 )
 
 # building variant analysis app with evo2 image
@@ -336,7 +337,8 @@ class Evo2Model:
         self.model = Evo2('evo2_7b')  # loading the 7B parameter model
         print("Evo2 model loaded.")
 
-    @modal.method()  # method to score sequences
+    # @modal.method()  # method to score sequences
+    @modal.fastapi_endpoint(method="POST")  # endpoint="/analyze_variant"
     def analyze_single_variant(self, variant_position: int, alternative: str, genome: str, chromosome: str):
         print("Analyzing single variant with Evo2 model!!!")
         print("Genome:", genome)
