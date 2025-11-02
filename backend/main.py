@@ -159,38 +159,28 @@ def run_brca1_analysis():
 
     y_true = (brca1_subset['class'] == 'LOF')
     auroc = roc_auc_score(y_true, -brca1_subset['evo2_delta_score'])
-
-    # Calculate threshold START
-    y_true = (brca1_subset["class"] == "LOF")
-
+    # calculating threshold start
+    y_true = (brca1_subset["class"] == "LOF")  # binary labels for LOF class
     # negating scores for correct direction
     fpr, tpr, thresholds = roc_curve(y_true, -brca1_subset["evo2_delta_score"])
-
     optimal_idx = (tpr - fpr).argmax()  # Youden's J statistic
-
     # negating back to original scale
     optimal_threshold = -thresholds[optimal_idx]
-
     lof_scores = brca1_subset.loc[brca1_subset["class"]
                                   == "LOF", "evo2_delta_score"]  # getting scores for LOF class i.e. Loss of Function
     func_scores = brca1_subset.loc[brca1_subset["class"]
                                    == "FUNC/INT", "evo2_delta_score"]  # getting scores for FUNC/INT class
-
     lof_std = lof_scores.std()  # standard deviation of LOF scores
     func_std = func_scores.std()  # standard deviation of FUNC/INT scores
-
     confidence_params = {
         "threshold": optimal_threshold,
         "lof_std": lof_std,
         "func_std": func_std
     }  # parameters for confidence calculation
-
     print("Confidence params:", confidence_params)
-
-    # Calculate threshold END
+    # calculating threshold end
 
     plt.figure(figsize=(4, 2))
-
     # Plot stripplot of distributions
     p = sns.stripplot(
         data=brca1_subset,
@@ -294,7 +284,7 @@ def get_genome_sequence(position, genome: str, chromosome: str, window_size=8192
     return sequence, start
 
 
-def analyze_single_variant(relative_pos_in_window, reference, alternative, window_seq, model):
+def analyze_variant(relative_pos_in_window, reference, alternative, window_seq, model):
     var_seq = window_seq[:relative_pos_in_window] + alternative + \
         window_seq[relative_pos_in_window+1:]  # creating variant sequence
     ref_score = model.score_sequences(
@@ -309,8 +299,31 @@ def analyze_single_variant(relative_pos_in_window, reference, alternative, windo
     - if the numer is too low then too many variants will be classified as benign
     - if the number is too high then too many variants will be classified as pathogenic when they are not.
     For defining that number we can use the BRCA1 dataset and find a threshold that maximizes the separation
-    
+    We use ROC Curve to find the optimal threshold. We want to find delta score number which best distinguishes between benign and pathogenic variants.
+    We find youden's J statistic to find the optimal threshold that maximizes the difference between true positive rate and false positive rate.
     """
+    threshold = -0.0009178519  # optimal threshold calculated from BRCA1 dataset
+    # standard deviation of delta scores for LOF class from BRCA1 dataset
+    lof_std = 0.0015140239
+    # standard deviation of delta scores for FUNC/INT class from BRCA1 dataset
+    func_std = 0.0009016589
+
+    if delta_score < threshold:
+        prediction = "likely pathogeni.c"
+        confidence = min(1.0, abs(delta_score - threshold) /
+                         lof_std)  # confidence calculation
+    else:
+        prediction = "likely benign."
+        confidence = min(1.0, abs(delta_score - threshold) /
+                         func_std)  # confidence calculation
+
+    return {
+        "reference": reference,
+        "alternative": alternative,
+        "delta_score": float(delta_score),
+        "prediction": prediction,
+        "classification_confidence": float(confidence)
+    }
 
 
 # configuring class for GPU usage
@@ -344,10 +357,21 @@ class Evo2Model:
                 f"Variant position {variant_position} is outside the fetched window (start={seq_start+1}, end={seq_start+len(window_seq)})")
         reference = window_seq[relative_pos]
         print("Reference is: " + reference)
+        # analyzing single variant
+        result = analyze_variant(
+            relative_pos_in_window=relative_pos,
+            reference=reference,
+            alternative=alternative,
+            window_seq=window_seq,
+            model=self.model
+        )
+        result["position"] = variant_position  # adding position to result
+        return result
 
 
 @app.local_entrypoint()
 def main():
     evo2Model = Evo2Model()
-    evo2Model.analyze_single_variant.remote(
+    result = evo2Model.analyze_single_variant.remote(
         variant_position=43119628, alternative='G', genome='hg38', chromosome='chr17')
+    print("Single variant analysis result:", result)
