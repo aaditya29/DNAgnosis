@@ -2,15 +2,29 @@
 
 import { get } from "http";
 import Link from "next/link";
-import { useEffect } from "react";
-import { Card, CardHeader, CardTitle } from "~/components/ui/card";
-import { getAvailableGenomes } from "~/utils/genome-api";
+import { useEffect, useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
+import { type GenomeAssemblyFromSearch,
+  getAvailableGenomes } from "~/utils/genome-api";
 
 export default function HomePage() {
+  const [genomes, setGenomes] = useState<GenomeAssemblyFromSearch[]>([]);// Genome data state
+  const [error, setError] = useState<string | null>(null);// Error state
+  const [isLoading, setIsLoading] = useState(false);// Loading state
+  const [selectedGenome, setSelectedGenome] = useState<string>("hg38");//default genome
   useEffect(() => {
     const fetchGenomes = async () => {
-      const data = await getAvailableGenomes();
-      console.log(data.genomes);
+      try {
+        setIsLoading(true);
+        const data = await getAvailableGenomes();
+        if (data.genomes && data.genomes["Human"]) {
+          setGenomes(data.genomes["Human"]);
+        }
+      } catch (err) {
+        setError("Genome Data Not Found. Please enter valid genome assembly.");
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchGenomes();
   }, []);
