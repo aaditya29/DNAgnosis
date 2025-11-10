@@ -10,6 +10,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchGenomes = async () => {
       const data = await getAvailableGenomes();
+      console.log(data.genomes);
     };
     fetchGenomes();
   }, []);
