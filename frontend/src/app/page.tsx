@@ -1,7 +1,18 @@
+"use client";
+
+import { get } from "http";
 import Link from "next/link";
+import { useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "~/components/ui/card";
+import { getAvailableGenomes } from "~/utils/genome-api";
 
 export default function HomePage() {
+  useEffect(() => {
+    const fetchGenomes = async () => {
+      const data = await getAvailableGenomes();
+    };
+    fetchGenomes();
+  }, []);
   return (
     <div className="min-h-screen bg-[#e9eeea]">
       <header className="border-b border-[#3c4f3d]/10 bg-white">
