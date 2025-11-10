@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Card, CardHeader, CardTitle } from "~/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -19,6 +20,22 @@ export default function HomePage() {
           </div>
         </div>
       </header>
-    </div>
+      <main className="container mx-auto px-6 py-6">
+      <Card className="mb-6 gap-0 border-none bg-white py-0 shadow-sm">
+              <CardHeader className="pt-4 pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-normal text-[#3c4f3d]/70">
+                    Genome Assembly
+                  </CardTitle>
+                  <div className="text-xs text-[#3c4f3d]/60">
+                    Organism: <span className="font-medium">Human</span>
+                  </div>
+                </div>
+              </CardHeader>
+              </Card>
+
+      </main>
+      
+      </div>
   );
 }
