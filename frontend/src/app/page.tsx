@@ -21,12 +21,12 @@ export default function HomePage() {
           setGenomes(data.genomes["Human"]);
         }
       } catch (err) {
-        setError("Genome Data Not Found. Please enter valid genome assembly.");
+        setError("Genome Data Not Found. Please enter valid genome assembly.");// Set error message
       } finally {
-        setIsLoading(false);
+        setIsLoading(false);// Reset loading state
       }
     };
-    fetchGenomes();
+    fetchGenomes();// Fetch genome data on component mount
   }, []);
   return (
     <div className="min-h-screen bg-[#e9eeea]">
