@@ -4,7 +4,7 @@ import { get } from "http";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
-import { type GenomeAssemblyFromSearch,
+import { type GenomeAssemblyFromSearch, type ChromosomeFromSearch, getGenomeChromosomes,
   getAvailableGenomes } from "~/utils/genome-api";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "~/components/ui/select";
 
@@ -13,6 +13,9 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);// Error state
   const [isLoading, setIsLoading] = useState(false);// Loading state
   const [selectedGenome, setSelectedGenome] = useState<string>("hg38");//default genome
+  const [chromosomes, setChromosomes] = useState<ChromosomeFromSearch[]>([]);// Chromosome data state
+  const [selectedChromosome, setSelectedChromosome] = useState<string>("chr1");// Default chromosome
+
   useEffect(() => {
     const fetchGenomes = async () => {
       try {
@@ -30,9 +33,28 @@ export default function HomePage() {
     fetchGenomes();// Fetch genome data on component mount
   }, []);
 
+  useEffect(() => {
+    const fetchChromosomes = async () => {
+      try {
+        setIsLoading(true);// Set loading state
+        const data = await getGenomeChromosomes(selectedGenome);// Fetch chromosomes for selected genome
+        setChromosomes(data.chromosomes);// Update chromosome state
+        console.log(data.chromosomes);// Log chromosome data
+        if (data.chromosomes.length > 0) {
+          setSelectedChromosome(data.chromosomes[0]!.name);// Set default selected chromosome
+        }//if chromosomes available
+      } catch (err) {
+        setError("Failed to load chromosome data");// Set error message
+      } finally {
+        setIsLoading(false);
+      }// Reset loading state
+    };//fetchChromosomes
+    fetchChromosomes();
+  }, [selectedGenome]);// Refetch chromosomes when selected genome changes
+
   const handleGenomeChange = (value: string) => {
     setSelectedGenome(value);
-  };
+  };// Handle genome selection change
 
   return (
     <div className="min-h-screen bg-[#e9eeea]">
