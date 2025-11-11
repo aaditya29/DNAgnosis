@@ -1,12 +1,20 @@
 "use client";
 
-import { get } from "http";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
-import { type GenomeAssemblyFromSearch, type ChromosomeFromSearch, getGenomeChromosomes,
-  getAvailableGenomes } from "~/utils/genome-api";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "~/components/ui/select";
+import { get } from "http";// Unused import, can be removed
+import Link from "next/link";// Next.js Link component
+import { useEffect, useState } from "react";// React hooks
+import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";// Import Card components
+import { type GenomeAssemblyFromSearch, type ChromosomeFromSearch, type GeneFromSearch, getGenomeChromosomes, searchGenes,
+  getAvailableGenomes } from "~/utils/genome-api";// Import genome API functions and types
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "~/components/ui/select";// Import Select components
+import { Table, TableBody, TableCell, TableHead, TableHeader,TableRow, } from "~/components/ui/table";// Import Table components
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Input } from "~/components/ui/input";// Import Input component
+import { Button } from "~/components/ui/button";// Import Button component
+import { Search } from "lucide-react";// Import Search icon
+import { set } from "zod/v4";
+import GeneViewer from "~/components/geneviewer";
+type Mode = "browse" | "search";// Mode type definition
 
 export default function HomePage() {
   const [genomes, setGenomes] = useState<GenomeAssemblyFromSearch[]>([]);// Genome data state
@@ -15,6 +23,10 @@ export default function HomePage() {
   const [selectedGenome, setSelectedGenome] = useState<string>("hg38");//default genome
   const [chromosomes, setChromosomes] = useState<ChromosomeFromSearch[]>([]);// Chromosome data state
   const [selectedChromosome, setSelectedChromosome] = useState<string>("chr1");// Default chromosome
+  const [searchQuery, setSearchQuery] = useState("");// Search query state
+  const [mode, setMode] = useState<Mode>("search");// Mode state: "search" or "browse"
+  const [searchResults, setSearchResults] = useState<GeneFromSearch[]>([]);// Search results state
+  const [selectedGene, setSelectedGene] = useState<GeneFromSearch | null>(null);// Selected gene state
 
   useEffect(() => {
     const fetchGenomes = async () => {
@@ -52,9 +64,66 @@ export default function HomePage() {
     fetchChromosomes();
   }, [selectedGenome]);// Refetch chromosomes when selected genome changes
 
-  const handleGenomeChange = (value: string) => {
+  const performGeneSearch = async (
+    query: string,
+    genome: string,
+    filterFn?: (gene: GeneFromSearch) => boolean,
+  ) => {
+    try {
+      setIsLoading(true);
+      const data = await searchGenes(query, genome);
+      const results = filterFn ? data.results.filter(filterFn) : data.results;
+      console.log("Gene search results:", results);// Log search results
+      setSearchResults(results);
+    } catch (err) {
+      setError("Faield to search genes");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (!selectedChromosome || mode !== "browse") return;
+    performGeneSearch(
+      selectedChromosome,
+      selectedGenome,
+      (gene: GeneFromSearch) => gene.chrom === selectedChromosome,
+    );
+  }, [selectedChromosome, selectedGenome, mode]);
+
+const handleGenomeChange = (value: string) => {
     setSelectedGenome(value);
+    setSearchResults([]);// Clear previous search results
+    setSelectedGene(null);// Clear selected gene
   };// Handle genome selection change
+  
+
+const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();// Prevent default form submission
+    if (!searchQuery.trim()) return;// Ignore empty queries
+    performGeneSearch(searchQuery, selectedGenome);// Perform gene search
+  }; 
+
+const switchMode = (newMode: Mode) => {
+    if (newMode === mode) return;// No change if same mode
+    setSearchResults([]);// Clear previous search results
+    setSelectedGene(null);// Clear selected gene
+    setError(null);// Clear previous errors
+    if (newMode === "browse" && selectedChromosome) {
+      performGeneSearch(
+        selectedChromosome,
+        selectedGenome,
+        (gene: GeneFromSearch) => gene.chrom === selectedChromosome,
+      );
+    }
+    setMode(newMode);// Update mode state
+};// Switch between "search" and "browse" modes
+const loadBRCA1Example = () => {
+  setMode("search");// Switch to search mode
+  setSearchQuery("BRCA1");// Set example search query
+  performGeneSearch("BRCA1", selectedGenome);// Perform search for BRCA1
+};
+
+
 
   return (
     <div className="min-h-screen bg-[#e9eeea]">
@@ -75,7 +144,15 @@ export default function HomePage() {
         </div>
       </header>
       <main className="container mx-auto px-6 py-6">
-      <Card className="mb-6 gap-0 border-none bg-white py-0 shadow-sm">
+      {selectedGene ? (
+          <GeneViewer
+            gene={selectedGene}
+            genomeId={selectedGenome}
+            onClose={() => setSelectedGene(null)}
+          />
+        ) : (
+          <>
+        <Card className="mb-6 gap-0 border-none bg-white py-0 shadow-sm">
               <CardHeader className="pt-4 pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-normal text-[#3c4f3d]/70">
@@ -114,6 +191,174 @@ export default function HomePage() {
                 )}
               </CardContent>
               </Card>
+              <Card className="mt-6 gap-0 border-none bg-white py-0 shadow-sm">
+              <CardHeader className="pt-4 pb-2">
+                <CardTitle className="text-sm font-normal text-[#3c4f3d]/70">
+                  Browse
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <Tabs
+                  value={mode}
+                  onValueChange={(value) => switchMode(value as Mode)}
+                >
+                  <TabsList className="mb-4 bg-[#e9eeea]">
+                    <TabsTrigger
+                      className="data-[state=active]:bg-white data-[state=active]:text-[#3c4f3d]"
+                      value="search"
+                    >
+                      Search Genes
+                    </TabsTrigger>
+                    <TabsTrigger
+                      className="data-[state=active]:bg-white data-[state=active]:text-[#3c4f3d]"
+                      value="browse"
+                    >
+                      Browse Chromosomes
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="search" className="mt-0">
+                    <div className="space-y-4">
+                      <form
+                        onSubmit={handleSearch}
+                        className="flex flex-col gap-3 sm:flex-row"
+                      >
+                        <div className="relative flex-1">
+                          <Input
+                            type="text"
+                            placeholder="Enter gene symbol or name"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="h-9 border-[#3c4f3d]/10 pr-10"
+                          />
+                          <Button
+                            type="submit"
+                            className="absolute top-0 right-0 h-full cursor-pointer rounded-l-none bg-[#3c4f3d] text-white hover:bg-[#3c4f3d]/90"
+                            size="icon"
+                            disabled={isLoading || !searchQuery.trim()}
+                          >
+                            <Search className="h-4 w-4" />
+                            <span className="sr-only">Search</span>
+                          </Button>
+                        </div>
+                      </form>
+                      <Button
+                        variant="link"
+                        className="h-auto cursor-pointer p-0 text-[#de8246] hover:text-[#de8246]/80"
+                        onClick={loadBRCA1Example}
+                      >
+                        Try BRCA1 example
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="browse" className="mt-0">
+                    <div className="max-h-[150px] overflow-y-auto pr-1">
+                      <div className="flex flex-wrap gap-2">
+                        {chromosomes.map((chrom) => (
+                          <Button
+                            key={chrom.name}
+                            variant="outline"
+                            size="sm"
+                            className={`h-8 cursor-pointer border-[#3c4f3d]/10 hover:bg-[#e9eeea] hover:text-[#3c4f3d] ${selectedChromosome === chrom.name ? "text[#3c4f3d] bg-[#e9eeea]" : ""}`}
+                            onClick={() => setSelectedChromosome(chrom.name)}
+                          >
+                            {chrom.name}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                {isLoading && (
+                  <div className="flex justify-center py-4">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#3c4f3d]/30 border-t-[#de8243]"></div>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                  </div>
+                )}
+
+                {searchResults.length > 0 && !isLoading && (
+                  <div className="mt-6">
+                    <div className="mb-2">
+                      <h4 className="text-xs font-normal text-[#3c4f3d]/70">
+                        {mode === "search" ? (
+                          <>
+                            Search Results:{" "}
+                            <span className="font-medium text-[#3c4f3d]">
+                              {searchResults.length} genes
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            Genes on {selectedChromosome}:{" "}
+                            <span className="font-medium text-[#3c4f3d]">
+                              {searchResults.length} found
+                            </span>
+                          </>
+                        )}
+                      </h4>
+                    </div>
+
+                    <div className="overflow-hidden rounded-md border border-[#3c4f3d]/5">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-[#e9eeea]/50 hover:bg-[e9eeea]/70">
+                            <TableHead className="text-xs font-normal text-[#3c4f3d]/70">
+                              Symbol
+                            </TableHead>
+                            <TableHead className="text-xs font-normal text-[#3c4f3d]/70">
+                              Name
+                            </TableHead>
+                            <TableHead className="text-xs font-normal text-[#3c4f3d]/70">
+                              Location
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {searchResults.map((gene, index) => (
+                            <TableRow
+                              key={`${gene.symbol}-${index}`}
+                              className="cursor-pointer border-b border-[#3c4f3d]/5 hover:bg-[#e9eeea]/50"
+                              onClick={() => setSelectedGene(gene)}
+                            >
+                              <TableCell className="py-2 font-medium text-[#3c4f3d]">
+                                {gene.symbol}
+                              </TableCell>
+                              <TableCell className="py-2 font-medium text-[#3c4f3d]">
+                                {gene.name}
+                              </TableCell>
+                              <TableCell className="py-2 font-medium text-[#3c4f3d]">
+                                {gene.chrom}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {!isLoading && !error && searchResults.length === 0 && (
+                  <div className="flex h-48 flex-col items-center justify-center text-center text-gray-400">
+                    <Search className="mb-4 h-10 w-10 text-gray-400" />
+                    <p className="text-sm leading-relaxed">
+                      {mode === "search"
+                        ? "Enter a gene or symbol and click search"
+                        : selectedChromosome
+                          ? "No genes found on this chromosome"
+                          : "Select a chromosome to view genes"}
+                    </p>
+                  </div>
+                )}
+          </CardContent>
+        </Card>
+         </>)}
 
       </main>
       
