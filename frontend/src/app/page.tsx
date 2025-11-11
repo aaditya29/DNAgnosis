@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { type GenomeAssemblyFromSearch,
   getAvailableGenomes } from "~/utils/genome-api";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "~/components/ui/select";
 
 export default function HomePage() {
   const [genomes, setGenomes] = useState<GenomeAssemblyFromSearch[]>([]);// Genome data state
@@ -28,6 +29,11 @@ export default function HomePage() {
     };
     fetchGenomes();// Fetch genome data on component mount
   }, []);
+
+  const handleGenomeChange = (value: string) => {
+    setSelectedGenome(value);
+  };
+
   return (
     <div className="min-h-screen bg-[#e9eeea]">
       <header className="border-b border-[#3c4f3d]/10 bg-white">
@@ -58,6 +64,33 @@ export default function HomePage() {
                   </div>
                 </div>
               </CardHeader>
+              <CardContent className="pb-4">
+              <Select
+                  value={selectedGenome}
+                  onValueChange={handleGenomeChange}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="h-9 w-full border-[#3c4f3d]/10">
+                    <SelectValue placeholder="Select genome assembly" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {genomes.map((genome) => (
+                      <SelectItem key={genome.id} value={genome.id}>
+                        {genome.id} - {genome.name}
+                        {genome.active ? " (active)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedGenome && (
+                  <p className="mt-2 text-xs text-[#3c4f3d]/60">
+                    {
+                      genomes.find((genome) => genome.id === selectedGenome)
+                        ?.sourceName
+                    }
+                  </p>
+                )}
+              </CardContent>
               </Card>
 
       </main>
