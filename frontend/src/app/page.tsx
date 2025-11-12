@@ -1,7 +1,5 @@
 "use client";
 
-import { get } from "http";// Unused import, can be removed
-import Link from "next/link";// Next.js Link component
 import { useEffect, useState } from "react";// React hooks
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";// Import Card components
 import { type GenomeAssemblyFromSearch, type ChromosomeFromSearch, type GeneFromSearch, getGenomeChromosomes, searchGenes,
@@ -12,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Input } from "~/components/ui/input";// Import Input component
 import { Button } from "~/components/ui/button";// Import Button component
 import { Search } from "lucide-react";// Import Search icon
-import { set } from "zod/v4";
 import GeneViewer from "~/components/geneviewer";
 type Mode = "browse" | "search";// Mode type definition
 
@@ -36,13 +33,13 @@ export default function HomePage() {
         if (data.genomes?.Human) {
           setGenomes(data.genomes.Human);
         }
-      } catch (err) {
+      } catch {
         setError("Unable to find Genome Data. Please enter valid genome assembly.");// Set error message
       } finally {
         setIsLoading(false);// Reset loading state
       }
     };
-    fetchGenomes();// Fetch genome data on component mount
+    void fetchGenomes();// Fetch genome data on component mount
   }, []);
 
   useEffect(() => {
@@ -55,13 +52,13 @@ export default function HomePage() {
         if (data.chromosomes.length > 0) {
           setSelectedChromosome(data.chromosomes[0]!.name);// Set default selected chromosome
         }//if chromosomes available
-      } catch (err) {
+      } catch {
         setError("Failed to load chromosome data.");// Set error message
       } finally {
         setIsLoading(false);
       }// Reset loading state
     };//fetchChromosomes
-    fetchChromosomes();
+    void fetchChromosomes();
   }, [selectedGenome]);// Refetch chromosomes when selected genome changes
 
   const performGeneSearch = async (
@@ -75,7 +72,7 @@ export default function HomePage() {
       const results = filterFn ? data.results.filter(filterFn) : data.results;
       console.log("Gene Search Results:", results);// Log search results
       setSearchResults(results);
-    } catch (err) {
+    } catch {
       setError("Failed to Search Genes.");
     } finally {
       setIsLoading(false);
@@ -83,7 +80,7 @@ export default function HomePage() {
   };
   useEffect(() => {
     if (!selectedChromosome || mode !== "browse") return;
-    performGeneSearch(
+    void performGeneSearch(
       selectedChromosome,
       selectedGenome,
       (gene: GeneFromSearch) => gene.chrom === selectedChromosome,
@@ -100,7 +97,7 @@ const handleGenomeChange = (value: string) => {
 const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();// Prevent default form submission
     if (!searchQuery.trim()) return;// Ignore empty queries
-    performGeneSearch(searchQuery, selectedGenome);// Perform gene search
+    void performGeneSearch(searchQuery, selectedGenome);// Perform gene search
   }; 
 
 const switchMode = (newMode: Mode) => {
@@ -109,7 +106,7 @@ const switchMode = (newMode: Mode) => {
     setSelectedGene(null);// Clear selected gene
     setError(null);// Clear previous errors
     if (newMode === "browse" && selectedChromosome) {
-      performGeneSearch(
+      void performGeneSearch(
         selectedChromosome,
         selectedGenome,
         (gene: GeneFromSearch) => gene.chrom === selectedChromosome,
@@ -120,7 +117,7 @@ const switchMode = (newMode: Mode) => {
 const loadBRCA1Example = () => {
   setMode("search");// Switch to search mode
   setSearchQuery("BRCA1");// Set example search query
-  performGeneSearch("BRCA1", selectedGenome);// Perform search for BRCA1
+  void performGeneSearch("BRCA1", selectedGenome);// Perform search for BRCA1
 };
 
 
