@@ -13,7 +13,7 @@ export function VariantComparisonModal({
   comparisonVariant: ClinvarVariant | null;
   onClose: () => void;
 }) {
-  if (!comparisonVariant || !comparisonVariant.evo2Result) return null;
+  if (!comparisonVariant?.evo2Result) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -74,8 +74,8 @@ export function VariantComparisonModal({
                         <span className="font-mono text-xs">
                           {(() => {
                             const match =
-                              comparisonVariant.title.match(/(\w)>(\w)/);
-                            if (match && match.length === 3) {
+                              /(\w)>(\w)/.exec(comparisonVariant.title);
+                            if (match?.length === 3) {
                               const [_, ref, alt] = match;
                               return (
                                 <>

@@ -203,7 +203,7 @@ export async function fetchGeneDetails(geneId: string): Promise<{
     const detailData = await detailsResponse.json();// Parse JSON response
 
     // Extract gene details and genomic information
-    if (detailData.result && detailData.result[geneId]) {
+    if (detailData.result?.[geneId]) {
       const detail = detailData.result[geneId];// Extract gene details
 
       // Ensure genomic information is available
@@ -299,8 +299,7 @@ export async function fetchClinvarVariants(
   const searchData = await searchResponse.json();
 
   if (
-    !searchData.esearchresult ||
-    !searchData.esearchresult.idlist ||
+    !searchData.esearchresult?.idlist ||
     searchData.esearchresult.idlist.length === 0
   ) {
     console.log("No ClinVar variants found");
@@ -330,7 +329,7 @@ export async function fetchClinvarVariants(
   const summaryData = await summaryResponse.json();
   const variants: ClinvarVariant[] = [];
 
-  if (summaryData.result && summaryData.result.uids) {
+  if (summaryData.result?.uids) {
     for (const id of summaryData.result.uids) {
       const variant = summaryData.result[id];
       variants.push({

@@ -33,8 +33,8 @@ export default function HomePage() {
       try {
         setIsLoading(true);
         const data = await getAvailableGenomes();
-        if (data.genomes && data.genomes["Human"]) {
-          setGenomes(data.genomes["Human"]);
+        if (data.genomes?.Human) {
+          setGenomes(data.genomes.Human);
         }
       } catch (err) {
         setError("Unable to find Genome Data. Please enter valid genome assembly.");// Set error message

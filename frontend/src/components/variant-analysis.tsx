@@ -216,11 +216,11 @@ const VariantAnalysis = forwardRef<VariantAnalysisHandle, VariantAnalysisProps>(
                     parseInt(variantPosition.replaceAll(",", "")),
               )
               .map((matchedVariant) => {
-                const refAltMatch = matchedVariant.title.match(/(\w)>(\w)/);
+                const refAltMatch = /(\w)>(\w)/.exec(matchedVariant.title);
 
                 let ref = null;
                 let alt = null;
-                if (refAltMatch && refAltMatch.length === 3) {
+                if (refAltMatch?.length === 3) {
                   ref = refAltMatch[1];
                   alt = refAltMatch[2];
                 }

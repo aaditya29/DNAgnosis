@@ -53,10 +53,10 @@ export default function KnownVariants({
       ? parseInt(variant.location.replaceAll(",", ""))
       : null;// Extract position from location string
 
-    const refAltMatch = variant.title.match(/(\w)>(\w)/);// Regex to extract reference and alternative alleles
+    const refAltMatch = /(\w)>(\w)/.exec(variant.title);// Regex to extract reference and alternative alleles
 
     // If regex matches, extract reference and alternative alleles
-    if (refAltMatch && refAltMatch.length === 3) {
+    if (refAltMatch?.length === 3) {
       variantDetails = {
         position,
         reference: refAltMatch[1],
@@ -66,8 +66,7 @@ export default function KnownVariants({
 
     // If variant details are incomplete, return early
     if (
-      !variantDetails ||
-      !variantDetails.position ||
+      !variantDetails?.position ||
       !variantDetails.reference ||
       !variantDetails.alternative
     ) {
