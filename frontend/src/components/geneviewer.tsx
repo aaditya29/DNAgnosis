@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchGeneDetails, fetchGeneSequence as apiFetchGeneSequence,
   type GeneFromSearch, type GeneDetailsFromSearch, type GeneBounds } from "~/utils/genome-api";
+
+import { GeneInformation } from "./gene-information";
 import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
 import { set } from "zod/v4";
@@ -103,6 +105,11 @@ export default function GeneViewer({
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to results
           </Button>
-          </div>
+          <GeneInformation
+            gene={gene}
+            geneDetail={geneDetail}
+            geneBounds={geneBounds}
+            />
+      </div>
     );    
   }
