@@ -37,7 +37,7 @@ export default function HomePage() {
           setGenomes(data.genomes["Human"]);
         }
       } catch (err) {
-        setError("Genome Data Not Found. Please enter valid genome assembly.");// Set error message
+        setError("Unable to find Genome Data. Please enter valid genome assembly.");// Set error message
       } finally {
         setIsLoading(false);// Reset loading state
       }
@@ -56,7 +56,7 @@ export default function HomePage() {
           setSelectedChromosome(data.chromosomes[0]!.name);// Set default selected chromosome
         }//if chromosomes available
       } catch (err) {
-        setError("Failed to load chromosome data");// Set error message
+        setError("Failed to load chromosome data.");// Set error message
       } finally {
         setIsLoading(false);
       }// Reset loading state
@@ -73,10 +73,10 @@ export default function HomePage() {
       setIsLoading(true);
       const data = await searchGenes(query, genome);
       const results = filterFn ? data.results.filter(filterFn) : data.results;
-      console.log("Gene search results:", results);// Log search results
+      console.log("Gene Search Results:", results);// Log search results
       setSearchResults(results);
     } catch (err) {
-      setError("Faield to search genes");
+      setError("Failed to Search Genes.");
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +170,7 @@ const loadBRCA1Example = () => {
                   disabled={isLoading}
                 >
                   <SelectTrigger className="h-9 w-full border-[#3c4f3d]/10">
-                    <SelectValue placeholder="Select genome assembly" />
+                    <SelectValue placeholder="Select Genome Assembly" />
                   </SelectTrigger>
                   <SelectContent>
                     {genomes.map((genome) => (
@@ -226,7 +226,7 @@ const loadBRCA1Example = () => {
                         <div className="relative flex-1">
                           <Input
                             type="text"
-                            placeholder="Enter gene symbol or name"
+                            placeholder="Enter Gene Symbol or Full Name"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="h-9 border-[#3c4f3d]/10 pr-10"
@@ -247,7 +247,7 @@ const loadBRCA1Example = () => {
                         className="h-auto cursor-pointer p-0 text-[#de8246] hover:text-[#de8246]/80"
                         onClick={loadBRCA1Example}
                       >
-                        Try BRCA1 example
+                        Try BRCA1 Example
                       </Button>
                     </div>
                   </TabsContent>
@@ -296,7 +296,7 @@ const loadBRCA1Example = () => {
                           </>
                         ) : (
                           <>
-                            Genes on {selectedChromosome}:{" "}
+                            Genes On {selectedChromosome}:{" "}
                             <span className="font-medium text-[#3c4f3d]">
                               {searchResults.length} found
                             </span>
