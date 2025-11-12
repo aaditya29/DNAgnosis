@@ -157,8 +157,8 @@ const results: GeneFromSearch[] = [];// Initialize results array
 
 // Process search results
 if (Array.isArray(data) && typeof data[0] === 'number' && data[0] > 0) {// If results found
-  const fieldMap = data[2] as Record<string, unknown[]>;// Field mapping by header row
-  const geneIds = fieldMap.GeneID! as string[];// Extract Gene IDs
+  const fieldMap = data[2] as Record<string, unknown[] | undefined>; // Field mapping
+  const geneIds = Array.isArray(fieldMap.GeneID) ? fieldMap.GeneID as string[] : [];
   const dataArray = data[3] as unknown[][];
   // Limit to first 10 results
   for (let i = 0; i < Math.min(10, data[0]); ++i) {
