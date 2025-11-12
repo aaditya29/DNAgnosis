@@ -37,7 +37,7 @@ export function VariantComparisonModal({
 
         {/* Modal content */}
         <div className="p-5">
-          {comparisonVariant && comparisonVariant.evo2Result && (
+          {comparisonVariant?.evo2Result && (
             <div className="space-y-6">
               <div className="rounded-md border border-[#3c4f3d]/10 bg-[#e9eeea]/30 p-4">
                 <h4 className="mb-3 text-sm font-medium text-[#3c4f3d]">
@@ -76,7 +76,7 @@ export function VariantComparisonModal({
                             const match =
                               /(\w)>(\w)/.exec(comparisonVariant.title);
                             if (match?.length === 3) {
-                              const [_, ref, alt] = match;
+                              const [, ref, alt] = match;
                               return (
                                 <>
                                   <span
