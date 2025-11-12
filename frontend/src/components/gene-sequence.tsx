@@ -3,7 +3,6 @@
 import type { GeneBounds, GeneDetailsFromSearch } from "~/utils/genome-api";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
-  startTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -227,7 +226,7 @@ export function GeneSequence({
       const colorizedChars: JSX.Element[] = [];
 
       for (let j = 0; j < chunk.length; j++) {
-        const nucleotide = chunk[j] || "";
+        const nucleotide = chunk[j] ?? "";
         const nucleotidePosition = lineStartPos + j;
         const color = getNucleotideColorClass(nucleotide);
         colorizedChars.push(
@@ -238,7 +237,7 @@ export function GeneSequence({
               setHoverPosition(nucleotidePosition);
               setMousePosition({ x: e.clientX, y: e.clientY });
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={() => {
               setHoverPosition(null);
               setMousePosition(null);
             }}
@@ -332,8 +331,6 @@ export function GeneSequence({
                   </div>
                 </div>
               </div>
-
-              // position controls feature 
               <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-[#3c4f3d]/70">Start:</span>
