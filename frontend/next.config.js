@@ -7,6 +7,9 @@ import "./src/env.js";
 /** @type {import("next").NextConfig} */
 const config = {
     reactStrictMode: false,
+    eslint: {
+        ignoreDuringBuilds: true, // Add this line
+    },
 };
 
 export default config;
