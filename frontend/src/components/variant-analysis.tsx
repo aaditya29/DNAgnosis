@@ -21,7 +21,6 @@ import {
   getNucleotideColorClass,
 } from "~/utils/coloring-utils";
 import { Button } from "./ui/button";
-import { match } from "node:assert";
 import { Zap } from "lucide-react";
 
 // Handle interface to expose methods to parent components
@@ -58,7 +57,7 @@ const VariantAnalysis = forwardRef<VariantAnalysisHandle, VariantAnalysisProps>(
   ) => {
     // State variables for managing variant input and analysis results
     const [variantPosition, setVariantPosition] = useState<string>(
-      geneBounds?.min?.toString() || "",
+      geneBounds?.min?.toString() ?? "",
     );// Position of the variant
     // Reference nucleotide at the variant position
     const [variantReference, setVariantReference] = useState("");
@@ -188,7 +187,7 @@ const VariantAnalysis = forwardRef<VariantAnalysisHandle, VariantAnalysisProps>(
               disabled={isAnalyzing || !variantPosition || !variantAlternative}
               className="h-8 cursor-pointer bg-[#3c4f3d] text-xs text-white hover:bg-[#3c4f3d]/90"
               onClick={() =>
-                handleVariantSubmit(
+                void handleVariantSubmit(
                   variantPosition.replaceAll(",", ""),
                   variantAlternative,
                 )
@@ -276,7 +275,7 @@ const VariantAnalysis = forwardRef<VariantAnalysisHandle, VariantAnalysisProps>(
                           className="h-7 cursor-pointer border-[#3c4f3d]/20 bg-[#e9eeea] text-xs text-[#3c4f3d] hover:bg-[#3c4f3d]/10"
                           onClick={() => {
                             setVariantAlternative(alt);
-                            handleVariantSubmit(
+                            void handleVariantSubmit(
                               variantPosition.replaceAll(",", ""),
                               alt,
                             );
@@ -373,5 +372,7 @@ const VariantAnalysis = forwardRef<VariantAnalysisHandle, VariantAnalysisProps>(
     );
   },
 );
+
+VariantAnalysis.displayName = "VariantAnalysis";
 
 export default VariantAnalysis;
