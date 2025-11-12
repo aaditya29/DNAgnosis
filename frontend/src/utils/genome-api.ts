@@ -82,13 +82,13 @@ export async function getAvailableGenomes(){
   // Organize genomes by organism
   for (const genomeId in genomes) {
     const genomeInfo = genomes[genomeId] as Record<string, unknown>;// Genome information
-    const organism = (genomeInfo.organism as string | undefined)! ?? "Other";// Default to "Other" if organism not specified
+    const organism = (genomeInfo.organism as string | undefined) ?? "Other";// Default to "Other" if organism not specified
 
     structuredGenomes[organism] ??= [];// Initialize organism array if not present
     structuredGenomes[organism].push({
       id: genomeId,
-      name: (genomeInfo.description as string | undefined)! ?? genomeId,
-      sourceName: (genomeInfo.sourceName as string | undefined)! ?? genomeId,
+      name: (genomeInfo.description as string | undefined) ?? genomeId,
+      sourceName: (genomeInfo.sourceName as string | undefined) ?? genomeId,
       active: !!genomeInfo.active,
     });// Add genome to organism array
   }
@@ -356,7 +356,7 @@ if (summaryData && typeof summaryData === 'object' && 'result' in summaryData) {
     const resultData = summaryData.result as Record<string, unknown>;
     for (const id of result.uids) {
       const variant = resultData[id] as Record<string, unknown>;
-      const objType = (variant.obj_type as string | undefined)! ?? "Unknown";
+      const objType = (variant.obj_type as string | undefined) ?? "Unknown";
       const germlineClass = variant.germline_classification as { description?: string } | undefined;
       variants.push({
         clinvar_id: id,
@@ -370,7 +370,7 @@ if (summaryData && typeof summaryData === 'object' && 'result' in summaryData) {
           .join(" "),
         classification:
           germlineClass?.description ?? "Unknown",
-        gene_sort: (variant.gene_sort as string | undefined)! ?? "",
+        gene_sort: (variant.gene_sort as string | undefined) ?? "",
         chromosome: chromFormatted,
         location: variant.location_sort
           ? parseInt(variant.location_sort as string).toLocaleString()
