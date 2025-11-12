@@ -203,3 +203,41 @@ export async function fetchGeneDetails(geneId: string): Promise<{
     return { geneDetails: null, geneBounds: null, initialRange: null };
   }
 }
+
+export async function fetchGeneSequence(
+  chrom: string,
+  start: number,
+  end: number,
+  genomeId: string,
+): Promise<{
+  sequence: string;
+  actualRange: { start: number; end: number };
+  error?: string;
+}> {
+  try {
+    const chromosome = chrom.startsWith("chr") ? chrom : `chr${chrom}`;// Ensure "chr" prefix
+
+    const apiStart = start - 1;// UCSC API uses 0-based start
+    const apiEnd = end;// UCSC API uses 1-based end
+
+    const apiUrl = `https://api.genome.ucsc.edu/getData/sequence?genome=${genomeId};chrom=${chromosome};start=${apiStart};end=${apiEnd}`;// UCSC API endpoint for sequence data
+    const response = await fetch(apiUrl);// Fetch sequence data
+    const data = await response.json();// Parse JSON response
+
+    const actualRange = { start, end };// Actual requested range
+
+    if (data.error || !data.dna) {
+      return { sequence: "", actualRange, error: data.error };
+    }// Check for errors in response
+
+    const sequence = data.dna.toUpperCase();// Extract and format sequence
+
+    return { sequence, actualRange };
+  } catch (err) {
+    return {
+      sequence: "",
+      actualRange: { start, end },
+      error: "Internal error in fetch gene sequence",
+    };
+  }
+}
