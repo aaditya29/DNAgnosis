@@ -19,6 +19,24 @@ export interface GeneFromSearch {
   gene_id?: string;
 }
 
+export interface GeneBounds {
+  min: number;
+  max: number;
+}
+
+export interface GeneDetailsFromSearch {
+  genomicinfo?: {
+    chrstart: number;
+    chrstop: number;
+    strand?: string;
+  }[];
+  summary?: string;
+  organism?: {
+    scientificname: string;
+    commonname: string;
+  };
+}
+
 export async function getAvailableGenomes(){
     const apiUrl = "https://api.genome.ucsc.edu/list/ucscGenomes";// UCSC API endpoint for genome assemblies
     const response = await fetch(apiUrl);
@@ -137,4 +155,51 @@ export async function searchGenes(query: string, genome: string) {
   }
 
   return { query, genome, results };// Return search results
+}
+
+// Fetch detailed gene information and genomic bounds
+export async function fetchGeneDetails(geneId: string): Promise<{
+  geneDetails: GeneDetailsFromSearch | null;// Detailed gene information
+  geneBounds: GeneBounds | null;// Genomic bounds of the gene
+  initialRange: { start: number; end: number } | null;// Initial sequence range for viewing
+}> {
+  try {
+    const detailUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gene&id=${geneId}&retmode=json`;
+    const detailsResponse = await fetch(detailUrl);// Fetch gene details from NCBI E-utilities
+
+    if (!detailsResponse.ok) {
+      console.error(
+        `Failed to fetch gene details: ${detailsResponse.statusText}`,
+      );
+      return { geneDetails: null, geneBounds: null, initialRange: null };
+    }
+
+    const detailData = await detailsResponse.json();// Parse JSON response
+
+    // Extract gene details and genomic information
+    if (detailData.result && detailData.result[geneId]) {
+      const detail = detailData.result[geneId];// Extract gene details
+
+      // Ensure genomic information is available
+      if (detail.genomicinfo && detail.genomicinfo.length > 0) {
+        const info = detail.genomicinfo[0];// Use the first genomic info entry
+
+        const minPos = Math.min(info.chrstart, info.chrstop);// Determine gene bounds
+        const maxPos = Math.max(info.chrstart, info.chrstop);// Determine gene bounds
+        const bounds = { min: minPos, max: maxPos };// Gene bounds
+        
+        // Determine initial sequence range (up to 10,000 bases)
+        const geneSize = maxPos - minPos;
+        const seqStart = minPos;
+        const seqEnd = geneSize > 10000 ? minPos + 10000 : maxPos;// Limit to 10,000 bases
+        const range = { start: seqStart, end: seqEnd };// Initial sequence range
+        // Return gene details, bounds, and initial range
+        return { geneDetails: detail, geneBounds: bounds, initialRange: range };
+      }
+    }
+    // If genomic info is missing, return nulls
+    return { geneDetails: null, geneBounds: null, initialRange: null };
+  } catch (err) {
+    return { geneDetails: null, geneBounds: null, initialRange: null };
+  }
 }
