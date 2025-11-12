@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { fetchGeneDetails, fetchGeneSequence as apiFetchGeneSequence,
-  type GeneFromSearch, type GeneDetailsFromSearch, type GeneBounds } from "~/utils/genome-api";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchGeneDetails, fetchGeneSequence as apiFetchGeneSequence,fetchClinvarVariants as apiFetchClinvarVariants,
+  type GeneFromSearch, type GeneDetailsFromSearch, type GeneBounds, type ClinvarVariant } from "~/utils/genome-api";
 
+import VariantAnalysis, { type VariantAnalysisHandle,} from "./variant-analysis";
+  
 import { GeneInformation } from "./gene-information";
+import { VariantComparisonModal } from "./variant-comparison-modal";
+import KnownVariants from "./known-variants";
 import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
 import { set } from "zod/v4";
@@ -28,10 +32,31 @@ export default function GeneViewer({
     const [startPosition, setStartPosition] = useState<string>("");
     const [endPosition, setEndPosition] = useState<string>("");
     const [isLoadingSequence, setIsLoadingSequence] = useState(false);
+    const [clinvarVariants, setClinvarVariants] = useState<ClinvarVariant[]>([]);
+    const [isLoadingClinvar, setIsLoadingClinvar] = useState(false);
+    const [clinvarError, setClinvarError] = useState<string | null>(null);
+
     const [actualRange, setActualRange] = useState<{
       start: number;
       end: number;
     } | null>(null);// Actual range of fetched sequence
+    
+    const [comparisonVariant, setComparisonVariant] = useState<ClinvarVariant | null>(null);
+    const [activeSequencePosition, setActiveSequencePosition] = useState<number | null>(null);
+    const [activeReferenceNucleotide, setActiveReferenceNucleotide] = useState<string | null>(null);
+    const variantAnalysisRef = useRef<VariantAnalysisHandle>(null);
+
+    const updateClinvarVariant = (
+      clinvar_id: string,
+      updateVariant: ClinvarVariant,
+    ) => {
+      setClinvarVariants((currentVariants) =>
+        currentVariants.map((v) =>
+          v.clinvar_id == clinvar_id ? updateVariant : v,
+        ),
+      );
+    };
+
     const fetchGeneSequence = useCallback(
       async (start: number, end: number) => {
         try {
@@ -96,6 +121,19 @@ export default function GeneViewer({
       initializeGeneData();
     }, [gene, genomeId]);
 
+    const handleSequenceClick = useCallback(
+      (position: number, nucleotide: string) => {
+        setActiveSequencePosition(position);
+        setActiveReferenceNucleotide(nucleotide);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (variantAnalysisRef.current) {
+          variantAnalysisRef.current.focusAlternativeInput();
+        }
+        },
+        [],
+      );
+  
+
     const handleLoadSequence = useCallback(() => {
       const start = parseInt(startPosition);
       const end = parseInt(endPosition);
@@ -127,7 +165,49 @@ export default function GeneViewer({
       setError(null);
       fetchGeneSequence(start, end);
     }, [startPosition, endPosition, fetchGeneSequence, geneBounds]);
-  
+
+    const fetchClinvarVariants = async () => {
+        if (!gene.chrom || !geneBounds) return;
+    
+        setIsLoadingClinvar(true);
+        setClinvarError(null);
+    
+        try {
+          const variants = await apiFetchClinvarVariants(
+            gene.chrom,
+            geneBounds,
+            genomeId,
+          );
+          setClinvarVariants(variants);
+          console.log(variants);
+        } catch (error) {
+          setClinvarError("Failed to fetch ClinVar variants");
+          setClinvarVariants([]);
+        } finally {
+          setIsLoadingClinvar(false);
+        }
+      };
+    
+      useEffect(() => {
+        if (geneBounds) {
+          fetchClinvarVariants();
+        }
+      }, [geneBounds]);
+
+      const showComparison = (variant: ClinvarVariant) => {
+        if (variant.evo2Result) {
+          setComparisonVariant(variant);
+        }
+      };
+      
+      if (isLoading) {
+        return (
+          <div className="flex h-64 items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-800"></div>
+          </div>
+        );
+      }
+
 
     return (
         <div className="space-y-6">
@@ -140,7 +220,28 @@ export default function GeneViewer({
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to results
           </Button>
-         
+
+          <VariantAnalysis
+        ref={variantAnalysisRef}
+        gene={gene}
+        genomeId={genomeId}
+        chromosome={gene.chrom}
+        clinvarVariants={clinvarVariants}
+        referenceSequence={activeReferenceNucleotide}
+        sequencePosition={activeSequencePosition}
+        geneBounds={geneBounds}
+      />
+
+          <KnownVariants
+            refreshVariants={fetchClinvarVariants}
+            showComparison={showComparison}
+            updateClinvarVariant={updateClinvarVariant}
+            clinvarVariants={clinvarVariants}
+            isLoadingClinvar={isLoadingClinvar}
+            clinvarError={clinvarError}
+            genomeId={genomeId}
+            gene={gene}
+          />
           <GeneSequence
             geneBounds={geneBounds}
             geneDetail={geneDetail}
@@ -153,7 +254,7 @@ export default function GeneViewer({
             isLoading={isLoadingSequence}
             error={error}
             onSequenceLoadRequest= {handleLoadSequence}
-            onSequenceClick={() => {}}
+            onSequenceClick={() => {handleSequenceClick}}
             maxViewRange={10000}
           />
 
@@ -162,6 +263,11 @@ export default function GeneViewer({
             geneDetail={geneDetail}
             geneBounds={geneBounds}
             />
+
+          <VariantComparisonModal
+            comparisonVariant={comparisonVariant}
+            onClose={() => setComparisonVariant(null)}
+      />
       </div>
     );    
   }
