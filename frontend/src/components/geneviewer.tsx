@@ -11,7 +11,6 @@ import { VariantComparisonModal } from "./variant-comparison-modal";
 import KnownVariants from "./known-variants";
 import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
-import { set } from "zod/v4";
 import { GeneSequence } from "./gene-sequence";
 
 
@@ -75,7 +74,7 @@ export default function GeneViewer({
           if (apiError) {
             setError(apiError);
           }
-        } catch (err) {
+        } catch {
           setError("Failed to load sequence data");
         } finally {
           setIsLoadingSequence(false);
@@ -83,6 +82,28 @@ export default function GeneViewer({
       },
       [gene.chrom, genomeId],
     );
+
+    const fetchClinvarVariants = useCallback(async () => {
+      if (!gene.chrom || !geneBounds) return;
+  
+      setIsLoadingClinvar(true);
+      setClinvarError(null);
+  
+      try {
+        const variants = await apiFetchClinvarVariants(
+          gene.chrom,
+          geneBounds,
+          genomeId,
+        );
+        setClinvarVariants(variants);
+        console.log(variants);
+      } catch {
+        setClinvarError("Failed to fetch ClinVar variants");
+        setClinvarVariants([]);
+      } finally {
+        setIsLoadingClinvar(false);
+      }
+    }, [gene.chrom, geneBounds, genomeId]);
 
     useEffect(() => {
       const initializeGeneData = async () =>{
@@ -118,8 +139,8 @@ export default function GeneViewer({
            setIsLoading(false);
         }
       }
-      initializeGeneData();
-    }, [gene, genomeId]);
+      void initializeGeneData();
+    }, [gene, genomeId, fetchGeneSequence]);
 
     const handleSequenceClick = useCallback(
       (position: number, nucleotide: string) => {
@@ -163,36 +184,14 @@ export default function GeneViewer({
       }
   
       setError(null);
-      fetchGeneSequence(start, end);
+      void fetchGeneSequence(start, end);
     }, [startPosition, endPosition, fetchGeneSequence, geneBounds]);
 
-    const fetchClinvarVariants = async () => {
-        if (!gene.chrom || !geneBounds) return;
-    
-        setIsLoadingClinvar(true);
-        setClinvarError(null);
-    
-        try {
-          const variants = await apiFetchClinvarVariants(
-            gene.chrom,
-            geneBounds,
-            genomeId,
-          );
-          setClinvarVariants(variants);
-          console.log(variants);
-        } catch (error) {
-          setClinvarError("Failed to fetch ClinVar variants");
-          setClinvarVariants([]);
-        } finally {
-          setIsLoadingClinvar(false);
-        }
-      };
-    
-      useEffect(() => {
-        if (geneBounds) {
-          fetchClinvarVariants();
-        }
-      }, [geneBounds]);
+    useEffect(() => {
+      if (geneBounds) {
+        void fetchClinvarVariants();
+      }
+    }, [geneBounds, fetchClinvarVariants]);
 
       const showComparison = (variant: ClinvarVariant) => {
         if (variant.evo2Result) {
@@ -254,7 +253,7 @@ export default function GeneViewer({
             isLoading={isLoadingSequence}
             error={error}
             onSequenceLoadRequest= {handleLoadSequence}
-            onSequenceClick={() => {handleSequenceClick}}
+            onSequenceClick={handleSequenceClick}
             maxViewRange={10000}
           />
 
