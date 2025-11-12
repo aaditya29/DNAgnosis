@@ -164,16 +164,16 @@ if (Array.isArray(data) && typeof data[0] === 'number' && data[0] > 0) {// If re
   for (let i = 0; i < Math.min(10, data[0]); ++i) {
     if (i < dataArray.length) {// Ensure index within bounds
       try {
-        const display = dataArray[i]!;// Extract display fields
-        let chrom = (display as unknown[])[0] as string;// Chromosome field
+        const display = dataArray[i]! as unknown[];// Extract display fields
+        let chrom = display[0] as string;// Chromosome field
         if (chrom && !chrom.startsWith("chr")) {// Ensure "chr" prefix
           chrom = `chr${chrom}`;
         }
         results.push({
-          symbol: (display as unknown[])[2] as string,
-          name: (display as unknown[])[3] as string,
+          symbol: display[2] as string,
+          name: display[3] as string,
           chrom,
-          description: (display as unknown[])[3] as string,
+          description: display[3] as string,
           gene_id: geneIds[i] ?? "",
         });// Add gene to results
       } catch {
