@@ -8,6 +8,7 @@ import { GeneInformation } from "./gene-information";
 import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
 import { set } from "zod/v4";
+import { GeneSequence } from "./gene-sequence";
 
 
 export default function GeneViewer({
@@ -94,6 +95,40 @@ export default function GeneViewer({
       }
       initializeGeneData();
     }, [gene, genomeId]);
+
+    const handleLoadSequence = useCallback(() => {
+      const start = parseInt(startPosition);
+      const end = parseInt(endPosition);
+      let validationError: string | null = null;
+  
+      if (isNaN(start) || isNaN(end)) {
+        validationError = "Please enter valid start and end positions";
+      } else if (start >= end) {
+        validationError = "Start position must be less than end position";
+      } else if (geneBounds) {
+        const minBound = Math.min(geneBounds.min, geneBounds.max);
+        const maxBound = Math.max(geneBounds.min, geneBounds.max);
+        if (start < minBound) {
+          validationError = `Start position (${start.toLocaleString()}) is below the minimum value (${minBound.toLocaleString()})`;
+        } else if (end > maxBound) {
+          validationError = `End position (${end.toLocaleString()}) exceeds the maximum value (${maxBound.toLocaleString()})`;
+        }
+  
+        if (end - start > 10000) {
+          validationError = `Selected range exceeds maximum view range of 10.000 bp.`;
+        }
+      }
+  
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+  
+      setError(null);
+      fetchGeneSequence(start, end);
+    }, [startPosition, endPosition, fetchGeneSequence, geneBounds]);
+  
+
     return (
         <div className="space-y-6">
           <Button
@@ -105,6 +140,23 @@ export default function GeneViewer({
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to results
           </Button>
+         
+          <GeneSequence
+            geneBounds={geneBounds}
+            geneDetail={geneDetail}
+            startPosition={startPosition}
+            endPosition={endPosition}
+            onStartPositionChange={setStartPosition}
+            onEndPositionChange={setEndPosition}
+            sequenceData={geneSequence}
+            sequenceRange={actualRange}
+            isLoading={isLoadingSequence}
+            error={error}
+            onSequenceLoadRequest= {handleLoadSequence}
+            onSequenceClick={() => {}}
+            maxViewRange={10000}
+          />
+
           <GeneInformation
             gene={gene}
             geneDetail={geneDetail}
