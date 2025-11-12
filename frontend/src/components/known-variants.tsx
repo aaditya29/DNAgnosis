@@ -15,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Viaoda_Libre } from "next/font/google";
 import {
   BarChart2,
   ExternalLink,
